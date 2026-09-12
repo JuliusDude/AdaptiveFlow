@@ -45,7 +45,59 @@
 
 ---
 
+## 🎯 Component C: Feature Engineering & Timing Optimizer
+
+- [x] **Task C1: Implement Feature Engineering Pipeline (`src/features/feature_engineering.py`)**
+  - Extract and validate 22 traffic-state features into standardized pandas DataFrames and numpy arrays
+  - Ensure strict column naming and feature schema consistency
+
+- [x] **Task C2: Implement Delay-Based Timing Optimizer (`src/optimization/timing_optimizer.py`)**
+  - Evaluate candidate timing plans P1–P7 by simulating forward from a given state
+  - Calculate average vehicle delay under each plan and select argmin delay as ground truth
+  - Unit-level optimizer validation
+
+- [x] **Task C3: Automated Testing for Features & Optimizer (`tests/test_features_optimizer.py`)**
+  - Validate 22-feature vector schema, data types, and boundary conditions
+  - Validate optimizer selection logic across asymmetric traffic demands
+  - Verify zero broken logic
+
+---
+
+## 🎯 Component D: Supervised Machine Learning Pipeline
+
+- [ ] **Task D1: Dataset Generation Pipeline (`src/ml/dataset.py`)**
+  - Generate diverse traffic scenarios and label via TimingOptimizer
+  - Enforce 70/15/15 train/val/test scenario-level split (preventing data leakage)
+
+- [ ] **Task D2: Model Training & Serialization (`src/ml/train.py`)**
+  - Train RandomForestClassifier with multiclass P1–P7 targets
+  - Evaluate accuracy, macro F1, confusion matrix, feature importance
+  - Save model artifact via joblib to `models/random_forest.pkl`
+
+- [ ] **Task D3: Real-Time Inference & Closed-Loop Controller (`src/ml/predict.py`)**
+  - Fast inference wrapper for simulated online signal control (< 2 ms)
+
+- [ ] **Task D4: Offline Benchmarking vs Fixed Baseline (`src/ml/evaluate.py`)**
+  - Run comparative evaluation on held-out test scenarios: Fixed Baseline (P4) vs ML Adaptive Controller
+  - Compute delay reduction, queue improvements, and throughput metrics
+
+---
+
+## 🎯 Component E: Streamlit Interactive Dashboard
+
+- [ ] **Task E1: Build Streamlit Dashboard Application (`src/dashboard/app.py`)**
+  - 4-way visual schematic of intersection, signals, and live queues
+  - Telemetry cards (counts, queues, arrival rates, speeds)
+  - ML recommendation panel (selected plan, green splits)
+  - Head-to-head performance comparison table & time-series charts
+  - Scenario preset selector & interactive controls
+
+---
+
 ## ✅ Completed Tasks
 
 - [x] Create and establish `RULES.md` development standards
 - [x] Author and approve project implementation plan
+- [x] Component A: Project Skeleton & Configuration (commit `c42e23c`)
+- [x] Component B: Traffic Simulation Engine (commit `4d4f6bf`)
+
