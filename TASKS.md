@@ -65,19 +65,19 @@
 
 ## 🎯 Component D: Supervised Machine Learning Pipeline
 
-- [ ] **Task D1: Dataset Generation Pipeline (`src/ml/dataset.py`)**
+- [x] **Task D1: Dataset Generation Pipeline (`src/ml/dataset.py`)**
   - Generate diverse traffic scenarios and label via TimingOptimizer
   - Enforce 70/15/15 train/val/test scenario-level split (preventing data leakage)
 
-- [ ] **Task D2: Model Training & Serialization (`src/ml/train.py`)**
+- [x] **Task D2: Model Training & Serialization (`src/ml/train.py`)**
   - Train RandomForestClassifier with multiclass P1–P7 targets
   - Evaluate accuracy, macro F1, confusion matrix, feature importance
   - Save model artifact via joblib to `models/random_forest.pkl`
 
-- [ ] **Task D3: Real-Time Inference & Closed-Loop Controller (`src/ml/predict.py`)**
+- [x] **Task D3: Real-Time Inference & Closed-Loop Controller (`src/ml/predict.py`)**
   - Fast inference wrapper for simulated online signal control (< 2 ms)
 
-- [ ] **Task D4: Offline Benchmarking vs Fixed Baseline (`src/ml/evaluate.py`)**
+- [x] **Task D4: Offline Benchmarking vs Fixed Baseline (`src/ml/evaluate.py`)**
   - Run comparative evaluation on held-out test scenarios: Fixed Baseline (P4) vs ML Adaptive Controller
   - Compute delay reduction, queue improvements, and throughput metrics
 
@@ -100,4 +100,6 @@
 - [x] Author and approve project implementation plan
 - [x] Component A: Project Skeleton & Configuration (commit `c42e23c`)
 - [x] Component B: Traffic Simulation Engine (commit `4d4f6bf`)
+- [x] Component C: Feature Engineering & Timing Optimizer (commit `54d92f2`)
+- [x] Component D: Supervised Machine Learning Pipeline
 
