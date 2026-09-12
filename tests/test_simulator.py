@@ -290,6 +290,52 @@ def test_congested_queue_headway_integrity():
             )
 
 
+def test_no_negative_vehicle_positions_in_heavy_congestion():
+    # Run 300 steps under congested preset and verify position >= 0.0 always
+    sim = IntersectionSimulation(generator=TrafficGenerator(preset="congested", seed=999))
+    for _ in range(300):
+        sim.step(dt=1.0)
+        for app in ("N", "S", "E", "W"):
+            for v in sim.vehicles[app]:
+                assert v.position >= 0.0, f"Vehicle {v.id} on {app} had negative position {v.position}"
+
+
+def test_moving_lead_vehicle_smooth_following():
+    # When lead vehicle is moving at desired speed, follower within 15m should not brake abruptly
+    v_lead = Vehicle(id=1, approach="N", arrival_time=0.0, position=50.0, speed=13.0, desired_speed=13.89)
+    v_fol = Vehicle(id=2, approach="N", arrival_time=0.0, position=38.0, speed=13.0, desired_speed=13.89)
+
+    v_fol.update_kinematics(
+        dt=1.0,
+        stop_line_pos=150.0,
+        intersection_end_pos=170.0,
+        can_proceed=True,
+        lead_vehicle=v_lead,
+    )
+    # With moving leader, safe_speed >= 13 m/s, so follower should maintain or accelerate, not drop to 6-8 m/s
+    assert v_fol.speed >= 12.5
+
+
+def test_comprehensive_delay_penalizes_trapped_queues():
+    metrics = SimulationMetrics()
+    # 2 vehicles exited with 10s delay each
+    v_ex1 = Vehicle(id=1, approach="N", arrival_time=0.0, wait_time=5.0)
+    v_ex2 = Vehicle(id=2, approach="N", arrival_time=0.0, wait_time=5.0)
+    metrics.record_exit(v_ex1, exit_time=20.0, free_flow_time=10.0)
+    metrics.record_exit(v_ex2, exit_time=20.0, free_flow_time=10.0)
+
+    # 4 vehicles trapped in queue with 50s wait each
+    trapped_vehs = [Vehicle(id=i, approach="E", arrival_time=0.0, wait_time=50.0) for i in range(3, 7)]
+
+    # Legacy exited-only average delay ignores trapped vehicles
+    assert metrics.average_delay == 10.0
+
+    # Comprehensive delay includes trapped vehicles: (2*10 + 4*50) / 6 = 220 / 6 = 36.67s
+    comp_delay = metrics.calculate_comprehensive_delay(trapped_vehs)
+    assert pytest.approx(comp_delay, abs=0.01) == 36.67
+
+
+
 
 
 

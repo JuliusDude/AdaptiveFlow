@@ -15,73 +15,79 @@ DATA_DIR = Path("data/processed")
 
 
 def sample_scenario_rates(rng: random.Random) -> Dict[str, float]:
-    """Sample diverse traffic demand patterns across 8 representative archetypes."""
+    """Sample diverse traffic demand patterns with balanced coverage across P1 through P7."""
     archetype = rng.choice([
         "balanced",
-        "north_heavy",
-        "south_heavy",
-        "east_heavy",
-        "west_heavy",
-        "opposing_ns",
-        "opposing_ew",
+        "slight_ns",
+        "slight_ew",
+        "moderate_ns",
+        "moderate_ew",
+        "heavy_ns",
+        "heavy_ew",
         "random_mix",
     ])
 
     if archetype == "balanced":
-        base = rng.uniform(10.0, 25.0)
-        return {app: round(base + rng.uniform(-3.0, 3.0), 1) for app in ("N", "S", "E", "W")}
+        base = rng.uniform(12.0, 24.0)
+        return {app: round(base + rng.uniform(-2.5, 2.5), 1) for app in ("N", "S", "E", "W")}
 
-    elif archetype == "north_heavy":
+    elif archetype == "slight_ns":
+        # Target: P5 (35s NS / 25s EW)
         return {
-            "N": round(rng.uniform(28.0, 45.0), 1),
-            "S": round(rng.uniform(10.0, 22.0), 1),
-            "E": round(rng.uniform(5.0, 14.0), 1),
-            "W": round(rng.uniform(5.0, 14.0), 1),
+            "N": round(rng.uniform(22.0, 30.0), 1),
+            "S": round(rng.uniform(18.0, 26.0), 1),
+            "E": round(rng.uniform(12.0, 18.0), 1),
+            "W": round(rng.uniform(12.0, 18.0), 1),
         }
 
-    elif archetype == "south_heavy":
+    elif archetype == "slight_ew":
+        # Target: P3 (25s NS / 35s EW)
         return {
-            "N": round(rng.uniform(10.0, 22.0), 1),
-            "S": round(rng.uniform(28.0, 45.0), 1),
-            "E": round(rng.uniform(5.0, 14.0), 1),
-            "W": round(rng.uniform(5.0, 14.0), 1),
+            "N": round(rng.uniform(12.0, 18.0), 1),
+            "S": round(rng.uniform(12.0, 18.0), 1),
+            "E": round(rng.uniform(22.0, 30.0), 1),
+            "W": round(rng.uniform(18.0, 26.0), 1),
         }
 
-    elif archetype == "east_heavy":
+    elif archetype == "moderate_ns":
+        # Target: P6 (40s NS / 20s EW)
         return {
-            "N": round(rng.uniform(5.0, 14.0), 1),
-            "S": round(rng.uniform(5.0, 14.0), 1),
-            "E": round(rng.uniform(28.0, 45.0), 1),
-            "W": round(rng.uniform(10.0, 22.0), 1),
+            "N": round(rng.uniform(28.0, 36.0), 1),
+            "S": round(rng.uniform(20.0, 30.0), 1),
+            "E": round(rng.uniform(8.0, 15.0), 1),
+            "W": round(rng.uniform(8.0, 15.0), 1),
         }
 
-    elif archetype == "west_heavy":
+    elif archetype == "moderate_ew":
+        # Target: P2 (20s NS / 40s EW)
         return {
-            "N": round(rng.uniform(5.0, 14.0), 1),
-            "S": round(rng.uniform(5.0, 14.0), 1),
-            "E": round(rng.uniform(10.0, 22.0), 1),
-            "W": round(rng.uniform(28.0, 45.0), 1),
+            "N": round(rng.uniform(8.0, 15.0), 1),
+            "S": round(rng.uniform(8.0, 15.0), 1),
+            "E": round(rng.uniform(28.0, 36.0), 1),
+            "W": round(rng.uniform(20.0, 30.0), 1),
         }
 
-    elif archetype == "opposing_ns":
+    elif archetype == "heavy_ns":
+        # Target: P7 (45s NS / 15s EW)
         return {
-            "N": round(rng.uniform(25.0, 40.0), 1),
-            "S": round(rng.uniform(25.0, 40.0), 1),
-            "E": round(rng.uniform(5.0, 12.0), 1),
-            "W": round(rng.uniform(5.0, 12.0), 1),
+            "N": round(rng.uniform(36.0, 45.0), 1),
+            "S": round(rng.uniform(25.0, 35.0), 1),
+            "E": round(rng.uniform(5.0, 10.0), 1),
+            "W": round(rng.uniform(5.0, 10.0), 1),
         }
 
-    elif archetype == "opposing_ew":
+    elif archetype == "heavy_ew":
+        # Target: P1 (15s NS / 45s EW)
         return {
-            "N": round(rng.uniform(5.0, 12.0), 1),
-            "S": round(rng.uniform(5.0, 12.0), 1),
-            "E": round(rng.uniform(25.0, 40.0), 1),
-            "W": round(rng.uniform(25.0, 40.0), 1),
+            "N": round(rng.uniform(5.0, 10.0), 1),
+            "S": round(rng.uniform(5.0, 10.0), 1),
+            "E": round(rng.uniform(36.0, 45.0), 1),
+            "W": round(rng.uniform(25.0, 35.0), 1),
         }
 
     else:  # random_mix
         return {
-            app: round(rng.uniform(5.0, 38.0), 1)
+            app: round(rng.uniform(8.0, 35.0), 1)
             for app in ("N", "S", "E", "W")
         }
 
@@ -102,6 +108,10 @@ def _process_single_scenario(args: Tuple[int, Dict[str, float], int, int]) -> Di
 
     row = dict(features)
     row["scenario_id"] = scenario_id
+    row["true_N_rate"] = rates["N"]
+    row["true_S_rate"] = rates["S"]
+    row["true_E_rate"] = rates["E"]
+    row["true_W_rate"] = rates["W"]
     row["target_plan"] = best_plan
     row["best_delay"] = all_delays[best_plan]
     return row
@@ -109,7 +119,7 @@ def _process_single_scenario(args: Tuple[int, Dict[str, float], int, int]) -> Di
 
 def generate_dataset(
     num_scenarios: int = 500,
-    warmup_steps: int = 35,
+    warmup_steps: int = 70,
     horizon_steps: int = 70,
     seed: int = 42,
     output_dir: Path = DATA_DIR,

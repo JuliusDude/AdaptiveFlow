@@ -72,3 +72,24 @@ def test_run_scenario_trial_benchmark():
     assert res["ml"]["total_exited"] > 0
     assert res["fixed"]["average_delay"] >= 0.0
     assert res["ml"]["average_delay"] >= 0.0
+
+
+def test_immediate_plan_actuation_at_cycle_boundary():
+    # Verify ISSUE-05 fix: plan selected at cycle boundary is applied immediately to current_plan_name
+    sim = IntersectionSimulation(seed=42)
+    controller = AdaptiveMLController()
+
+    # Advance to end of cycle 1 (70s)
+    for _ in range(70):
+        sim.step(dt=1.0)
+
+    # Signal completed cycle
+    assert sim.signal.just_completed_cycle is True
+
+    # Controller updates and sets plan immediately
+    selected = controller.update(sim)
+    assert selected is not None
+    # Current active plan must equal selected plan immediately (no 70s lag)
+    assert sim.signal.current_plan_name == selected
+    assert sim.signal.next_plan_name == selected
+

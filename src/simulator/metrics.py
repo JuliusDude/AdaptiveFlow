@@ -1,6 +1,6 @@
 """Performance metrics tracking for intersection simulation."""
 
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
 from src.simulator.vehicle import Vehicle
 
 
@@ -88,9 +88,37 @@ class SimulationMetrics:
         total_q_sum = sum(sum(step.values()) for step in self.queue_history)
         return total_q_sum / len(self.queue_history)
 
-    def get_summary(self, elapsed_seconds: float = 1.0) -> Dict[str, Any]:
-        """Compute performance summary dictionary."""
+    def calculate_comprehensive_delay(self, active_vehicles: List[Vehicle]) -> float:
+        """Calculate average delay including both completed trips and in-network waiting vehicles.
+
+        Eliminates survivorship bias by penalizing controllers that leave vehicles trapped in queues.
+        """
+        active_wait = sum(v.wait_time for v in active_vehicles)
+        total_delay = self.total_delay_seconds + active_wait
+        total_vehicles = self.total_exited + len(active_vehicles)
+        if total_vehicles == 0:
+            return 0.0
+        return total_delay / total_vehicles
+
+    def get_summary(
+        self,
+        elapsed_seconds: float = 1.0,
+        active_vehicles: Optional[List[Vehicle]] = None,
+    ) -> Dict[str, Any]:
+        """Compute performance summary dictionary.
+
+        Args:
+            elapsed_seconds: Total elapsed simulation time.
+            active_vehicles: Optional list of all in-network/queued vehicles for comprehensive delay.
+        """
         throughput_vph = (self.total_exited / max(1.0, elapsed_seconds)) * 3600.0
+
+        if active_vehicles is not None:
+            comp_delay = round(self.calculate_comprehensive_delay(active_vehicles), 2)
+            active_count = len(active_vehicles)
+        else:
+            comp_delay = round(self.average_delay, 2)
+            active_count = 0
 
         per_approach_summary = {}
         for app in ("N", "S", "E", "W"):
@@ -108,8 +136,10 @@ class SimulationMetrics:
         return {
             "total_spawned": self.total_spawned,
             "total_exited": self.total_exited,
+            "active_in_network": active_count,
             "throughput_vph": round(throughput_vph, 1),
             "average_delay": round(self.average_delay, 2),
+            "comprehensive_delay": comp_delay,
             "average_wait": round(self.average_wait, 2),
             "average_queue": round(self.average_queue, 2),
             "max_queue": self.max_queue,

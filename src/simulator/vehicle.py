@@ -47,27 +47,32 @@ class Vehicle:
         if self.state == "exited":
             return
 
-        # Determine target stopping barrier ahead
+        # Determine target stopping barrier ahead and barrier speed
         target_stop_pos = float("inf")
+        barrier_speed = 0.0
 
         # 1. Lead vehicle barrier
         if lead_vehicle is not None and lead_vehicle.state != "exited":
-            target_stop_pos = lead_vehicle.position - self.effective_length
+            lead_barrier = lead_vehicle.position - self.effective_length
+            target_stop_pos = lead_barrier
+            barrier_speed = lead_vehicle.speed
 
         # 2. Red signal barrier (only applies if vehicle has not crossed stop line)
         if not can_proceed and self.position <= stop_line_pos:
-            target_stop_pos = min(target_stop_pos, stop_line_pos)
+            if stop_line_pos < target_stop_pos:
+                target_stop_pos = stop_line_pos
+                barrier_speed = 0.0
 
         # Distance to effective barrier
         dist_to_barrier = max(0.0, target_stop_pos - self.position)
 
         # Kinematics: calculate target speed based on barrier
-        if dist_to_barrier <= 0.1:
-            # Stopped at barrier
+        if dist_to_barrier <= 0.1 and barrier_speed < 0.5:
+            # Stopped at stationary barrier
             target_speed = 0.0
         else:
-            # Safe stopping speed: v^2 = 2 * decel * dist
-            safe_speed = (2.0 * self.max_decel * dist_to_barrier) ** 0.5
+            # Safe stopping speed accounting for lead speed: v^2 = v_lead^2 + 2 * decel * dist
+            safe_speed = (barrier_speed**2 + 2.0 * self.max_decel * dist_to_barrier) ** 0.5
             target_speed = min(self.desired_speed, safe_speed)
 
         # Acceleration / deceleration
@@ -80,10 +85,13 @@ class Vehicle:
         avg_speed = (self.speed + new_speed) / 2.0
         new_position = self.position + avg_speed * dt
 
-        # Enforce barrier boundary
-        if new_position > target_stop_pos:
-            new_position = target_stop_pos
-            new_speed = 0.0
+        # Enforce barrier boundary (accounting for moving barrier over dt) and clamp position >= 0.0
+        barrier_boundary = target_stop_pos + barrier_speed * dt
+        if new_position > barrier_boundary:
+            new_position = max(0.0, barrier_boundary)
+            new_speed = barrier_speed
+        else:
+            new_position = max(0.0, new_position)
 
         self.speed = max(0.0, new_speed)
         self.position = new_position

@@ -99,16 +99,16 @@
 - [x] **Task F1: Codebase Audit & Defect Discovery (`ISSUES.md`)**
   - Conduct full architectural, physical, algorithmic, and machine learning audit
   - Document all 8 critical and high-priority issues in `ISSUES.md` with empirical proof
-- [ ] **Task F2: Metrics & Kinematics Remediation**
+- [x] **Task F2: Metrics & Kinematics Remediation**
   - Fix survivorship bias in delay metric (implement comprehensive delay in `metrics.py`)
   - Fix negative vehicle positions and queue spillback entrance buffering in `vehicle.py` and `intersection.py`
   - Refine car-following model to account for lead vehicle velocity
-- [ ] **Task F3: ML Pipeline & Controller Remediation**
+- [x] **Task F3: ML Pipeline & Controller Remediation**
   - Fix arrival rate halving in `src/ml/evaluate.py`
   - Align feature extraction and dataset warmup timing to cycle start boundary (`warmup_steps = 70`)
   - Eliminate 1-cycle actuation lag in `AdaptiveMLController.update`
   - Rebalance dataset generation archetypes to restore $P_2 \dots P_6$ representation and re-train model
-- [ ] **Task F4: Dashboard Polish & End-to-End Verification**
+- [x] **Task F4: Dashboard Polish & End-to-End Verification**
   - Fix preset selection desynchronization in `app.py`
   - Run full regression test suite and verify >15-25% true delay reduction benchmark
 
@@ -122,7 +122,10 @@
 - [x] Component B: Traffic Simulation Engine (commit `4d4f6bf`)
 - [x] Component C: Feature Engineering & Timing Optimizer (commit `54d92f2`)
 - [x] Component D: Supervised Machine Learning Pipeline (commit `8a1570e`)
-- [x] Component E: Streamlit Interactive Dashboard
+- [x] Component E: Streamlit Interactive Dashboard (commit `2ea7a0b`)
 - [x] Component F1: Full System Codebase Audit & `ISSUES.md` Authoring
+- [x] Component F2: Metrics & Kinematics Remediation (Issues 01, 04, 06)
+- [x] Component F3: ML Pipeline & Controller Remediation (Issues 02, 03, 05, 07)
+- [x] Component F4: Dashboard Polish & Full Verification (Issue 08)
 
 

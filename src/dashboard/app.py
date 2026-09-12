@@ -83,8 +83,8 @@ def step_both_simulations(num_steps: int = 1) -> None:
 
         st.session_state.sim_history.append({
             "time": t,
-            "fixed_delay": f_summary["average_delay"],
-            "ml_delay": m_summary["average_delay"],
+            "fixed_delay": f_summary.get("comprehensive_delay", f_summary["average_delay"]),
+            "ml_delay": m_summary.get("comprehensive_delay", m_summary["average_delay"]),
             "fixed_queue": f_summary["average_queue"],
             "ml_queue": m_summary["average_queue"],
             "fixed_throughput": f_summary["throughput_vph"],
@@ -126,8 +126,11 @@ def main() -> None:
         r_w = st.sidebar.slider("West Rate", 5.0, 50.0, 10.0, 1.0)
         custom_rates = {"N": r_n, "S": r_s, "E": r_e, "W": r_w}
 
-    col_btn1, col_btn2 = st.sidebar.columns(2)
-    if col_btn1.button("🔄 Reset Sim", use_container_width=True):
+    # Auto-detect preset changes and reset simulation
+    if st.session_state.get("current_preset") != preset:
+        reset_simulation(preset, custom_rates)
+
+    if st.sidebar.button("🔄 Reset Simulation", use_container_width=True):
         reset_simulation(preset, custom_rates)
         st.rerun()
 
@@ -232,9 +235,9 @@ def main() -> None:
     f_res = sim_fixed.get_summary()
     m_res = sim_ml.get_summary()
 
-    f_delay = f_res["average_delay"]
-    m_delay = m_res["average_delay"]
-    delay_diff_pct = ((f_delay - m_delay) / max(0.1, f_delay)) * 100.0 if f_delay > 0 else 0.0
+    f_comp_delay = f_res.get("comprehensive_delay", f_res["average_delay"])
+    m_comp_delay = m_res.get("comprehensive_delay", m_res["average_delay"])
+    comp_delay_diff_pct = ((f_comp_delay - m_comp_delay) / max(0.1, f_comp_delay)) * 100.0 if f_comp_delay > 0 else 0.0
 
     f_queue = f_res["average_queue"]
     m_queue = m_res["average_queue"]
@@ -245,10 +248,10 @@ def main() -> None:
     tp_diff = m_tp - f_tp
 
     m1, m2, m3, m4 = st.columns(4)
-    m1.metric("Average Vehicle Delay", f"{m_delay:.2f} s", f"{delay_diff_pct:+.1f}% vs Fixed ({f_delay:.2f}s)", delta_color="inverse")
+    m1.metric("Comprehensive Delay", f"{m_comp_delay:.2f} s", f"{comp_delay_diff_pct:+.1f}% vs Fixed ({f_comp_delay:.2f}s)", delta_color="inverse")
     m2.metric("Average Queue Length", f"{m_queue:.2f}", f"{queue_diff_pct:+.1f}% vs Fixed ({f_queue:.2f})", delta_color="inverse")
     m3.metric("Throughput", f"{m_tp:.0f} vph", f"{tp_diff:+.0f} vph vs Fixed ({f_tp:.0f})")
-    m4.metric("Total Exited Vehicles", f"{m_res['total_exited']}", f"{m_res['total_exited'] - f_res['total_exited']:+d} vs Fixed ({f_res['total_exited']})")
+    m4.metric("Exited Trips (Delay)", f"{m_res['total_exited']} ({m_res['average_delay']:.1f}s)", f"vs Fixed: {f_res['total_exited']} ({f_res['average_delay']:.1f}s)")
 
     # Time series charts
     if st.session_state.sim_history:

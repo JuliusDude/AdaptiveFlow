@@ -45,6 +45,14 @@ class IntersectionSimulation:
         # Active vehicles on each approach: dict of lists, sorted by position descending (leaders first)
         self.vehicles: Dict[str, List[Vehicle]] = {"N": [], "S": [], "E": [], "W": []}
 
+        # Entrance holding buffers when queues spill back to approach entry (position 0.0)
+        self.entry_buffers: Dict[str, deque] = {
+            "N": deque(),
+            "S": deque(),
+            "E": deque(),
+            "W": deque(),
+        }
+
         # Rolling history buffers for 22-feature calculation
         # Arrival events per approach: list of timestamps within last 30s
         self._recent_arrivals: Dict[str, deque] = {
@@ -87,17 +95,17 @@ class IntersectionSimulation:
         """
         self.current_time += dt
 
-        # 1. Spawn new vehicles from traffic generator
+        # 1. Spawn new vehicles and queue them into entry buffers
         new_vehicles = self.generator.generate_step(self.current_time, dt=dt)
         for v in new_vehicles:
-            self.vehicles[v.approach].append(v)
+            self.entry_buffers[v.approach].append(v)
             self.metrics.record_spawn(v)
             self._recent_arrivals[v.approach].append(self.current_time)
 
         # 2. Advance traffic signal
         self.signal.step(dt=dt)
 
-        # 3. Update vehicle kinematics per approach
+        # 3. Update vehicle kinematics and inject buffered vehicles per approach
         for app in ("N", "S", "E", "W"):
             # Sort vehicles so leaders are at the front (highest position first)
             self.vehicles[app].sort(key=lambda veh: veh.position, reverse=True)
@@ -127,6 +135,24 @@ class IntersectionSimulation:
 
             self.vehicles[app] = active_list
 
+            # Release vehicles from entry buffer if space is clear (rearmost position >= 6.5m)
+            while self.entry_buffers[app]:
+                rearmost_pos = min((v.position for v in self.vehicles[app]), default=float("inf"))
+                if rearmost_pos >= 6.5:
+                    v_entry = self.entry_buffers[app].popleft()
+                    v_entry.position = 0.0
+                    v_entry.speed = 0.0
+                    v_entry.state = "approaching"
+                    self.vehicles[app].append(v_entry)
+                else:
+                    break
+
+            # Accumulate waiting time for any vehicles still stuck in entrance buffer
+            for v_buf in self.entry_buffers[app]:
+                v_buf.wait_time += dt
+                v_buf.state = "queued"
+                v_buf.speed = 0.0
+
             # Telemetry buffering: mean speed this step
             if speeds_this_step:
                 mean_spd = sum(speeds_this_step) / len(speeds_this_step)
@@ -139,9 +165,10 @@ class IntersectionSimulation:
             while self._recent_arrivals[app] and self._recent_arrivals[app][0] < cutoff_time:
                 self._recent_arrivals[app].popleft()
 
-            # Telemetry buffering: current queue
-            current_q = sum(1 for v in active_list if v.state == "queued")
-            self._recent_queues[app].append(current_q)
+            # Telemetry buffering: current queue (stopped on road + queued in entry buffer)
+            road_q = sum(1 for v in self.vehicles[app] if v.state == "queued")
+            total_q = road_q + len(self.entry_buffers[app])
+            self._recent_queues[app].append(total_q)
 
         # 4. Record step queues in metrics
         step_queues = {app: self._recent_queues[app][-1] for app in ("N", "S", "E", "W")}
@@ -161,11 +188,11 @@ class IntersectionSimulation:
         """
         features: Dict[str, float] = {}
 
-        # 1. Demand: vehicle count inside observation zone
+        # 1. Demand: vehicle count inside observation zone and entry buffer
         for app in ("N", "S", "E", "W"):
-            features[f"{app}_count"] = float(len(self.vehicles[app]))
+            features[f"{app}_count"] = float(len(self.vehicles[app]) + len(self.entry_buffers[app]))
 
-        # 2. Congestion: stopped queue length
+        # 2. Congestion: stopped queue length (including entry buffer)
         for app in ("N", "S", "E", "W"):
             q_now = self._recent_queues[app][-1]
             features[f"{app}_queue"] = float(q_now)
@@ -196,4 +223,7 @@ class IntersectionSimulation:
 
     def get_summary(self) -> Dict[str, Any]:
         """Return comprehensive simulation metrics summary."""
-        return self.metrics.get_summary(elapsed_seconds=self.current_time)
+        active_vehs = [v for app_vehs in self.vehicles.values() for v in app_vehs] + [
+            v for buf in self.entry_buffers.values() for v in buf
+        ]
+        return self.metrics.get_summary(elapsed_seconds=self.current_time, active_vehicles=active_vehs)

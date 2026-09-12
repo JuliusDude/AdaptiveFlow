@@ -85,6 +85,8 @@ def evaluate_benchmark(
 
     fixed_delays: List[float] = []
     ml_delays: List[float] = []
+    fixed_exited_delays: List[float] = []
+    ml_exited_delays: List[float] = []
     fixed_queues: List[float] = []
     ml_queues: List[float] = []
     fixed_throughputs: List[float] = []
@@ -94,20 +96,28 @@ def evaluate_benchmark(
 
     for i, rec in enumerate(eval_records):
         seed = int(rec.get("scenario_id", i + 1000))
-        # Reconstruct arrival rates from test record or defaults
+        # Reconstruct arrival rates from test record (rates are already in veh/min)
         rates = {
-            "N": float(rec.get("N_arrival", 15.0) / 2.0) if "N_arrival" in rec else float(rec.get("N", 15.0)),
-            "S": float(rec.get("S_arrival", 15.0) / 2.0) if "S_arrival" in rec else float(rec.get("S", 15.0)),
-            "E": float(rec.get("E_arrival", 15.0) / 2.0) if "E_arrival" in rec else float(rec.get("E", 15.0)),
-            "W": float(rec.get("W_arrival", 15.0) / 2.0) if "W_arrival" in rec else float(rec.get("W", 15.0)),
+            "N": float(rec.get("true_N_rate", rec.get("N_arrival", rec.get("N", 15.0)))),
+            "S": float(rec.get("true_S_rate", rec.get("S_arrival", rec.get("S", 15.0)))),
+            "E": float(rec.get("true_E_rate", rec.get("E_arrival", rec.get("E", 15.0)))),
+            "W": float(rec.get("true_W_rate", rec.get("W_arrival", rec.get("W", 15.0)))),
         }
 
         trial = run_scenario_trial(rates=rates, seed=seed, duration_seconds=duration_seconds)
         f_res = trial["fixed"]
         m_res = trial["ml"]
 
-        fixed_delays.append(f_res["average_delay"])
-        ml_delays.append(m_res["average_delay"])
+        # Primary: comprehensive delay (penalizes trapped queues, eliminates survivorship bias)
+        f_comp_delay = f_res.get("comprehensive_delay", f_res["average_delay"])
+        m_comp_delay = m_res.get("comprehensive_delay", m_res["average_delay"])
+        fixed_delays.append(f_comp_delay)
+        ml_delays.append(m_comp_delay)
+
+        # Secondary: exited-only trip delay
+        fixed_exited_delays.append(f_res["average_delay"])
+        ml_exited_delays.append(m_res["average_delay"])
+
         fixed_queues.append(f_res["average_queue"])
         ml_queues.append(m_res["average_queue"])
         fixed_throughputs.append(f_res["throughput_vph"])
@@ -116,10 +126,12 @@ def evaluate_benchmark(
         scenario_details.append({
             "scenario_id": seed,
             "rates": rates,
-            "fixed_delay": f_res["average_delay"],
-            "ml_delay": m_res["average_delay"],
+            "fixed_comprehensive_delay": f_comp_delay,
+            "ml_comprehensive_delay": m_comp_delay,
+            "fixed_exited_delay": f_res["average_delay"],
+            "ml_exited_delay": m_res["average_delay"],
             "delay_improvement_pct": round(
-                ((f_res["average_delay"] - m_res["average_delay"]) / max(0.1, f_res["average_delay"])) * 100.0,
+                ((f_comp_delay - m_comp_delay) / max(0.1, f_comp_delay)) * 100.0,
                 2,
             ),
             "plans_selected": m_res.get("plans_selected", []),
@@ -128,6 +140,9 @@ def evaluate_benchmark(
     avg_f_delay = round(sum(fixed_delays) / len(fixed_delays), 2)
     avg_m_delay = round(sum(ml_delays) / len(ml_delays), 2)
     delay_improvement_pct = round(((avg_f_delay - avg_m_delay) / max(0.1, avg_f_delay)) * 100.0, 2)
+
+    avg_f_exited_delay = round(sum(fixed_exited_delays) / len(fixed_exited_delays), 2)
+    avg_m_exited_delay = round(sum(ml_exited_delays) / len(ml_exited_delays), 2)
 
     avg_f_queue = round(sum(fixed_queues) / len(fixed_queues), 2)
     avg_m_queue = round(sum(ml_queues) / len(ml_queues), 2)
@@ -139,12 +154,14 @@ def evaluate_benchmark(
     results = {
         "scenarios_evaluated": len(eval_records),
         "fixed_baseline": {
-            "average_delay_s": avg_f_delay,
+            "comprehensive_delay_s": avg_f_delay,
+            "exited_delay_s": avg_f_exited_delay,
             "average_queue": avg_f_queue,
             "average_throughput_vph": avg_f_tp,
         },
         "ml_adaptive": {
-            "average_delay_s": avg_m_delay,
+            "comprehensive_delay_s": avg_m_delay,
+            "exited_delay_s": avg_m_exited_delay,
             "average_queue": avg_m_queue,
             "average_throughput_vph": avg_m_tp,
         },
@@ -167,7 +184,8 @@ def evaluate_benchmark(
     print("=======================================================")
     print(f"{'Metric':<25s} | {'Fixed (P4)':<12s} | {'ML Adaptive':<12s} | {'Improvement':<12s}")
     print("-------------------------------------------------------")
-    print(f"{'Average Vehicle Delay':<25s} | {avg_f_delay:>9.2f} s | {avg_m_delay:>9.2f} s | {delay_improvement_pct:>+9.2f} %")
+    print(f"{'Comprehensive Delay':<25s} | {avg_f_delay:>9.2f} s | {avg_m_delay:>9.2f} s | {delay_improvement_pct:>+9.2f} %")
+    print(f"{'Exited-Only Delay':<25s} | {avg_f_exited_delay:>9.2f} s | {avg_m_exited_delay:>9.2f} s | {round(((avg_f_exited_delay-avg_m_exited_delay)/max(0.1, avg_f_exited_delay))*100, 2):>+9.2f} %")
     print(f"{'Average Queue Length':<25s} | {avg_f_queue:>10.2f} | {avg_m_queue:>10.2f} | {queue_improvement_pct:>+9.2f} %")
     print(f"{'Throughput (vph)':<25s} | {avg_f_tp:>10.1f} | {avg_m_tp:>10.1f} | {avg_m_tp - avg_f_tp:>+9.1f}")
     print("=======================================================\n")

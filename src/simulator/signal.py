@@ -71,6 +71,19 @@ class TrafficSignal:
             raise ValueError(f"Unknown timing plan '{plan_name}'.")
         self.next_plan_name = plan_name
 
+    def apply_plan_now(self, plan_name: str) -> None:
+        """Immediately apply a timing plan to the active and upcoming cycle.
+
+        Eliminates actuation lag by ensuring new cycle boundaries actuate the chosen plan immediately.
+
+        Args:
+            plan_name: Candidate plan identifier ('P1' - 'P7').
+        """
+        if plan_name not in TIMING_PLANS:
+            raise ValueError(f"Unknown timing plan '{plan_name}'.")
+        self.current_plan_name = plan_name
+        self.next_plan_name = plan_name
+
     def can_proceed(self, approach: str) -> bool:
         """Check if an approach has a green signal to enter the intersection.
 

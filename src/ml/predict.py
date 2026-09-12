@@ -108,12 +108,22 @@ class AdaptiveMLController:
             Recommended timing plan if an update occurred, else None.
         """
         # Apply update at cycle boundary or when forced
-        if force_update or sim.signal.just_completed_cycle or sim.signal.cycle_count == 0 and sim.current_time == 0:
-            features = extract_features(sim)
-            plan = self.predictor.predict(features)
-            probs = self.predictor.predict_proba(features)
+        if force_update or sim.signal.just_completed_cycle or (sim.signal.cycle_count == 0 and sim.current_time == 0):
+            # For empty simulation start (t=0 with no vehicles), default to balanced baseline P4
+            # to avoid predicting on an empty zero-vector state
+            total_active_vehs = sum(len(q) for q in sim.vehicles.values()) + sum(
+                len(b) for b in getattr(sim, "entry_buffers", {}).values()
+            )
+            if sim.current_time == 0 and total_active_vehs == 0:
+                plan = "P4"
+                probs = {p: (1.0 if p == "P4" else 0.0) for p in TIMING_PLANS}
+            else:
+                features = extract_features(sim)
+                plan = self.predictor.predict(features)
+                probs = self.predictor.predict_proba(features)
 
-            sim.signal.set_next_plan(plan)
+            # Apply plan immediately so current cycle actuates the selected timings (no 70s actuation lag)
+            sim.signal.apply_plan_now(plan)
 
             decision = {
                 "time": sim.current_time,
