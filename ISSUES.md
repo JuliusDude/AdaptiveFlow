@@ -22,6 +22,11 @@ A comprehensive code, algorithmic, physical, and mathematical audit was conducte
 | **[ISSUE-06](#issue-06-car-following-stationary-wall-assumption)** | **MEDIUM** | `src/simulator/vehicle.py` | **Car-Following Kinematics Flaw**: Moving lead vehicles are treated as stationary walls, causing artificial shockwaves and deceleration during green phases. |
 | **[ISSUE-07](#issue-07-severe-target-class-imbalance-and-macro-f1-collapse)** | **MEDIUM** | `src/ml/dataset.py` & `src/ml/train.py` | **Target Class Imbalance & F1 Collapse**: 71% of samples are $P_1$ or $P_7$; intermediate classes ($P_2, P_3, P_5, P_6$) have an **F1 score of 0.0000**. |
 | **[ISSUE-08](#issue-08-streamlit-dashboard-state-desync-and-dead-layout-code)** | **LOW** | `src/dashboard/app.py` | **Dashboard State Desynchronization**: Changing preset dropdown does not reset the simulation; unused layout columns waste UI space. |
+| **[ISSUE-09](#issue-09-crawlingmoving-delay-omission-for-in-network-vehicles)** | **MEDIUM** | `src/optimization/timing_optimizer.py` | **Crawling/Moving Delay Omission**: Active vehicles only count stopped wait time ($v < 0.5$ m/s); crawling delay ($0.5-5.0$ m/s) is completely ignored in optimizer evaluations. |
+| **[ISSUE-10](#issue-10-structural-tie-breaking-bias-toward-eastwest-plans)** | **LOW** | `src/optimization/timing_optimizer.py` | **Structural Tie-Break Bias**: Insertion order tie-breaking in `optimize()` systematically favors East/West plans ($P_1, P_2, P_3$) over North/South counterparts ($P_7, P_6, P_5$). |
+| **[ISSUE-11](#issue-11-discrete-euler-braking-overshoot-at-stop-line)** | **MEDIUM** | `src/simulator/vehicle.py` | **Discrete Euler Braking Overshoot**: Continuous stopping equation with $\Delta t = 1.0$s causes approaching vehicles to overshoot stop lines and slam from 11.35 m/s to 0 m/s in 1 step. |
+| **[ISSUE-12](#issue-12-clearance-phase-elapsed-time-reset-bug)** | **MEDIUM** | `src/simulator/signal.py` | **Clearance Elapsed Time Corruption**: `phase_elapsed_time` resets to 0.0 at Yellow and All-Red, causing `get_feature_encoding()` to broadcast misleading phase start signals. |
+| **[ISSUE-13](#issue-13-misleading-survivorship-biased-dashboard-charts)** | **LOW** | `src/dashboard/app.py` | **Misleading Delay Chart in Dashboard**: Live time-series charts plot exited-only delay, misleading users into believing Fixed Timing is outperforming ML during congestion. |
 
 ---
 
@@ -222,6 +227,112 @@ Rebalance scenario sampling in `dataset.py` with moderate asymmetric ratios (e.g
 
 #### Remediation
 Add change detection on `preset` to automatically reset simulation state when a new preset is selected, and clean up the unused sidebar column.
+
+---
+
+### ISSUE-09: Crawling/Moving Delay Omission for In-Network Vehicles
+* **Severity:** Medium
+* **Affected Component:** `src/optimization/timing_optimizer.py` (Lines 57–63)
+* **Affected Symbols:** `TimingOptimizer.evaluate_plan`
+
+#### Description & Root Cause
+In `evaluate_plan`, in-network active vehicle delay is aggregated via:
+```python
+active_queued_delay = sum(
+    v.wait_time for app_vehs in eval_sim.vehicles.values() for v in app_vehs
+)
+```
+In `vehicle.py#L94`, `wait_time` is incremented **only when `speed < 0.5` m/s**. If vehicles are crawling at 0.6–3.0 m/s behind a slow-moving queue or decelerating from 14 m/s, their speed is $\ge 0.5$ m/s, so `wait_time` remains 0.0. In contrast, for completed vehicles, delay is computed as `actual_travel_time - free_flow_time` (capturing all lost time).
+
+#### Consequences
+Candidates that leave vehicles crawling at 1–2 km/h are not penalized as heavily as candidates where vehicles come to a complete stop, skewing optimizer plan selection during congested transitions.
+
+#### Remediation
+For active vehicles, calculate delay as `max(0.0, (current_time - v.arrival_time) - (v.position / v.desired_speed))`, capturing both stopped delay and crawling/deceleration delay consistently.
+
+---
+
+### ISSUE-10: Structural Tie-Breaking Bias Toward East/West Plans
+* **Severity:** Low
+* **Affected Component:** `src/optimization/timing_optimizer.py` (Lines 114–118)
+* **Affected Symbols:** `TimingOptimizer.optimize`
+
+#### Description & Root Cause
+```python
+best_plan = min(
+    self.candidate_plans,
+    key=lambda p: (all_delays[p], abs(int(p[1:]) - 4)),
+)
+```
+When delay is identical between balanced alternatives (e.g. $P_3$ vs $P_5$, or $P_2$ vs $P_6$), `abs(int(p[1:]) - 4)` produces the exact same distance (1 or 2). Because `self.candidate_plans = ['P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7']`, Python's `min()` retains the earliest element encountered.
+
+#### Consequences
+Ties between $P_3$ (EW priority) and $P_5$ (NS priority) always resolve to $P_3$. Ties between $P_2$ and $P_6$ always resolve to $P_2$. This systematically biases ground-truth labels toward East/West priority.
+
+#### Remediation
+Break ties using approach demand/queue totals: if $N+S > E+W$, prefer the NS plan ($P_5/P_6/P_7$); if $E+W > N+S$, prefer the EW plan ($P_3/P_2/P_1$).
+
+---
+
+### ISSUE-11: Discrete Euler Braking Overshoot at Stop Line
+* **Severity:** Medium
+* **Affected Component:** `src/simulator/vehicle.py` (Lines 69–71, 84–86)
+* **Affected Symbols:** `Vehicle.update_kinematics`
+
+#### Description & Root Cause
+Continuous kinematics calculates stopping speed as $v_{\text{safe}} = \sqrt{2 \cdot d_{\text{max}} \cdot \text{dist}}$.
+At $\Delta t = 1.0\text{s}$, a vehicle cruising at 13.89 m/s travels 13.89 meters per time step. When approaching a red light at stop line 150m:
+* At $t=2$: Vehicle reaches position 146.51m at 11.35 m/s (3.49m from stop line).
+* At $t=3$: The vehicle calculates $v_{\text{safe}} = \sqrt{8 \times 3.49} = 5.28$ m/s, decelerates to 7.35 m/s, and attempts to step forward by 9.35m (landing at 155.86m, past the stop line).
+* The clamp triggers: `new_position = 150.0; new_speed = 0.0`.
+* In a single second, velocity drops from **11.35 m/s to 0.0 m/s** (an instantaneous deceleration of **11.35 m/s² or 1.16g**).
+
+#### Consequences
+Vehicles approaching red signals experience an unrealistic emergency collision stop at the line rather than a smooth deceleration profile.
+
+#### Remediation
+Incorporate a discrete time-step buffer term in safe stopping calculations: $d_{\text{stop}} = \frac{v^2}{2 d_{\text{max}}} + v \cdot \Delta t$.
+
+---
+
+### ISSUE-12: Clearance Phase Elapsed Time Reset Bug
+* **Severity:** Medium
+* **Affected Component:** `src/simulator/signal.py` (Lines 106–121, 134, 149)
+* **Affected Symbols:** `TrafficSignal.get_feature_encoding`, `TrafficSignal.step`
+
+#### Description & Root Cause
+In `TrafficSignal.step()`:
+* When Phase A Green expires at 30s, `current_phase = PHASE_A_YELLOW` and `phase_elapsed_time` is reset to `0.0`.
+* When Yellow expires at 3s, `current_phase = PHASE_A_ALL_RED` and `phase_elapsed_time` is reset to `0.0` again.
+Now in `get_feature_encoding()`:
+```python
+if self.current_phase in (
+    SignalPhase.PHASE_A_GREEN,
+    SignalPhase.PHASE_A_YELLOW,
+    SignalPhase.PHASE_A_ALL_RED,
+):
+    return 0, float(self.phase_elapsed_time)
+```
+During Yellow second 2, `get_feature_encoding()` returns `(0, 2.0)`. This tells the feature vector that Phase A has only been active for 2.0 seconds, when in fact Phase A has been active for 32 seconds and is about to turn Red.
+
+#### Consequences
+Any feature vector extracted during Yellow or All-Red clearance receives corrupted, inverted elapsed time information.
+
+#### Remediation
+Maintain continuous `principal_phase_elapsed_time` that does not reset until the entire Phase clearance (Green + Yellow + All-Red) completes.
+
+---
+
+### ISSUE-13: Misleading Survivorship-Biased Dashboard Charts
+* **Severity:** Low
+* **Affected Component:** `src/dashboard/app.py` (Lines 86, 258–263)
+* **Affected Symbols:** `step_both_simulations`, `main`
+
+#### Description & Root Cause
+The live dashboard line charts plot `fixed_delay` and `ml_delay` using `SimulationMetrics.average_delay`. Because `average_delay` ignores queued vehicles (Issue 01), during congested runs (such as `north_heavy` or `opposing_ns_heavy`), the red line (Fixed Delay) plots lower than the green line (ML Delay), visually misleading users into believing Fixed Timing is outperforming ML Adaptive Control.
+
+#### Remediation
+Plot comprehensive delay (or average queue length as the primary comparative indicator) on the dashboard charts so visual feedback accurately matches network throughput and queue reductions.
 
 ---
 
