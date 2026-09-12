@@ -88,13 +88,30 @@ class SimulationMetrics:
         total_q_sum = sum(sum(step.values()) for step in self.queue_history)
         return total_q_sum / len(self.queue_history)
 
-    def calculate_comprehensive_delay(self, active_vehicles: List[Vehicle]) -> float:
+    def calculate_comprehensive_delay(
+        self,
+        active_vehicles: List[Vehicle],
+        current_time: Optional[float] = None,
+    ) -> float:
         """Calculate average delay including both completed trips and in-network waiting vehicles.
 
-        Eliminates survivorship bias by penalizing controllers that leave vehicles trapped in queues.
+        Eliminates survivorship and crawling bias by penalizing controllers that leave vehicles
+        trapped in queues or crawling at low speeds.
+
+        Args:
+            active_vehicles: List of Vehicle instances currently inside the network or entry buffer.
+            current_time: Current simulation timestamp. If provided, calculates true lost time
+                (elapsed - free-flow travel time). If None, defaults to stopped wait_time.
         """
-        active_wait = sum(v.wait_time for v in active_vehicles)
-        total_delay = self.total_delay_seconds + active_wait
+        if current_time is not None:
+            active_delay = sum(
+                max(0.0, (current_time - v.arrival_time) - (v.position / max(1.0, v.desired_speed)))
+                for v in active_vehicles
+            )
+        else:
+            active_delay = sum(v.wait_time for v in active_vehicles)
+
+        total_delay = self.total_delay_seconds + active_delay
         total_vehicles = self.total_exited + len(active_vehicles)
         if total_vehicles == 0:
             return 0.0
@@ -114,7 +131,7 @@ class SimulationMetrics:
         throughput_vph = (self.total_exited / max(1.0, elapsed_seconds)) * 3600.0
 
         if active_vehicles is not None:
-            comp_delay = round(self.calculate_comprehensive_delay(active_vehicles), 2)
+            comp_delay = round(self.calculate_comprehensive_delay(active_vehicles, current_time=elapsed_seconds), 2)
             active_count = len(active_vehicles)
         else:
             comp_delay = round(self.average_delay, 2)

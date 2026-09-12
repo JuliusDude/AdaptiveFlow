@@ -258,11 +258,19 @@ def main() -> None:
         hist_df = pd.DataFrame(st.session_state.sim_history)
         ch_col1, ch_col2 = st.columns(2)
         with ch_col1:
-            st.markdown("##### ⏱️ Average Vehicle Delay Over Time (s)")
-            st.line_chart(hist_df.set_index("time")[["fixed_delay", "ml_delay"]], color=["#dc3545", "#28a745"])
+            st.markdown("##### ⏱️ Comprehensive Vehicle Delay Over Time (s)")
+            delay_chart_df = hist_df.rename(
+                columns={"fixed_delay": "Fixed Delay", "ml_delay": "ML Adaptive Delay"}
+            ).set_index("time")[["Fixed Delay", "ML Adaptive Delay"]]
+            st.line_chart(delay_chart_df, color=["#dc3545", "#28a745"])
+            st.caption("Comprehensive delay accounts for completed trips plus active queued and crawling vehicles.")
         with ch_col2:
             st.markdown("##### 🚗 Average Queue Length Over Time")
-            st.line_chart(hist_df.set_index("time")[["fixed_queue", "ml_queue"]], color=["#dc3545", "#28a745"])
+            queue_chart_df = hist_df.rename(
+                columns={"fixed_queue": "Fixed Queue", "ml_queue": "ML Adaptive Queue"}
+            ).set_index("time")[["Fixed Queue", "ML Adaptive Queue"]]
+            st.line_chart(queue_chart_df, color=["#dc3545", "#28a745"])
+            st.caption("Aggregate stopped and buffered queue count across all approaches.")
 
     st.divider()
 

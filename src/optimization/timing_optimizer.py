@@ -53,13 +53,17 @@ class TimingOptimizer:
         completed_delay = eval_sim.metrics.total_delay_seconds
         completed_vehicles = eval_sim.metrics.total_exited
 
-        # 2. Total accumulated wait time from vehicles still queued/waiting at the end
-        active_queued_delay = sum(
-            v.wait_time for app_vehs in eval_sim.vehicles.values() for v in app_vehs
+        # 2. Total accumulated delay from active vehicles in network and entry buffers
+        all_active_vehs = [v for app_vehs in eval_sim.vehicles.values() for v in app_vehs] + [
+            v for buf in eval_sim.entry_buffers.values() for v in buf
+        ]
+        active_delay = sum(
+            max(0.0, (eval_sim.current_time - v.arrival_time) - (v.position / max(1.0, v.desired_speed)))
+            for v in all_active_vehs
         )
-        active_vehicles = sum(len(app_vehs) for app_vehs in eval_sim.vehicles.values())
+        active_vehicles = len(all_active_vehs)
 
-        total_experienced_delay = completed_delay + active_queued_delay
+        total_experienced_delay = completed_delay + active_delay
         total_vehicles = completed_vehicles + active_vehicles
 
         if total_vehicles == 0:
@@ -111,11 +115,52 @@ class TimingOptimizer:
         """
         all_delays = self.evaluate_all_plans(sim=sim, horizon_steps=horizon_steps, dt=dt)
 
-        # Select plan with minimum delay (tie-break prefers balanced P4)
-        best_plan = min(
-            self.candidate_plans,
-            key=lambda p: (all_delays[p], abs(int(p[1:]) - 4)),
+        # Calculate approach queue and demand pressure to eliminate structural tie-break bias
+        ns_queue = (
+            sum(1 for v in sim.vehicles["N"] if v.state == "queued")
+            + len(sim.entry_buffers["N"])
+            + sum(1 for v in sim.vehicles["S"] if v.state == "queued")
+            + len(sim.entry_buffers["S"])
         )
+        ew_queue = (
+            sum(1 for v in sim.vehicles["E"] if v.state == "queued")
+            + len(sim.entry_buffers["E"])
+            + sum(1 for v in sim.vehicles["W"] if v.state == "queued")
+            + len(sim.entry_buffers["W"])
+        )
+
+        ns_demand = (
+            len(sim.vehicles["N"])
+            + len(sim.entry_buffers["N"])
+            + len(sim.vehicles["S"])
+            + len(sim.entry_buffers["S"])
+        )
+        ew_demand = (
+            len(sim.vehicles["E"])
+            + len(sim.entry_buffers["E"])
+            + len(sim.vehicles["W"])
+            + len(sim.entry_buffers["W"])
+        )
+
+        # Net directional pressure (positive = NS heavier, negative = EW heavier)
+        net_ns_pressure = (ns_queue - ew_queue) if (ns_queue != ew_queue) else (ns_demand - ew_demand)
+
+        def tie_break_key(p: str) -> Tuple[float, float, int]:
+            idx = int(p[1:])
+            offset = idx - 4  # Positive for NS priority, negative for EW priority, 0 for P4
+            delay = round(all_delays[p], 2)
+            if net_ns_pressure > 0:
+                # NS demand heavier: prefer higher index (more NS green)
+                pref = -float(offset)
+            elif net_ns_pressure < 0:
+                # EW demand heavier: prefer lower index (more EW green)
+                pref = float(offset)
+            else:
+                # Symmetrically balanced demand: prefer balanced P4
+                pref = float(abs(offset))
+            return (delay, pref, abs(offset))
+
+        best_plan = min(self.candidate_plans, key=tie_break_key)
         return best_plan, all_delays[best_plan], all_delays
 
     def evaluate_scenario(

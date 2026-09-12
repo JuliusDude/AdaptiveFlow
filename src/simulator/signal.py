@@ -53,6 +53,7 @@ class TrafficSignal:
 
         self.current_phase = SignalPhase.PHASE_A_GREEN
         self.phase_elapsed_time: float = 0.0
+        self.principal_phase_elapsed_time: float = 0.0
         self.cycle_count: int = 0
         self.just_completed_cycle: bool = False
 
@@ -120,17 +121,17 @@ class TrafficSignal:
         """Return numerical encoding for ML features (current_phase, elapsed_phase_time).
 
         Encoding:
-            current_phase: 0 = N/S green (Phase A active), 1 = E/W green (Phase B active).
-            elapsed_phase_time: seconds elapsed in current principal phase.
+            current_phase: 0 = N/S active (Phase A), 1 = E/W active (Phase B).
+            elapsed_phase_time: seconds elapsed in current principal phase (continuous through clearances).
         """
         if self.current_phase in (
             SignalPhase.PHASE_A_GREEN,
             SignalPhase.PHASE_A_YELLOW,
             SignalPhase.PHASE_A_ALL_RED,
         ):
-            return 0, float(self.phase_elapsed_time)
+            return 0, float(self.principal_phase_elapsed_time)
         else:
-            return 1, float(self.phase_elapsed_time)
+            return 1, float(self.principal_phase_elapsed_time)
 
     def step(self, dt: float = 1.0) -> None:
         """Advance signal state by dt seconds.
@@ -140,6 +141,7 @@ class TrafficSignal:
         """
         self.just_completed_cycle = False
         self.phase_elapsed_time += dt
+        self.principal_phase_elapsed_time += dt
 
         if self.current_phase == SignalPhase.PHASE_A_GREEN:
             if self.phase_elapsed_time >= self.plan["NS"]:
@@ -155,6 +157,7 @@ class TrafficSignal:
             if self.phase_elapsed_time >= self.all_red_duration:
                 self.current_phase = SignalPhase.PHASE_B_GREEN
                 self.phase_elapsed_time = 0.0
+                self.principal_phase_elapsed_time = 0.0
 
         elif self.current_phase == SignalPhase.PHASE_B_GREEN:
             if self.phase_elapsed_time >= self.plan["EW"]:
@@ -171,6 +174,7 @@ class TrafficSignal:
                 # Cycle complete!
                 self.current_phase = SignalPhase.PHASE_A_GREEN
                 self.phase_elapsed_time = 0.0
+                self.principal_phase_elapsed_time = 0.0
                 self.cycle_count += 1
                 self.just_completed_cycle = True
                 # Apply queued timing plan for next cycle

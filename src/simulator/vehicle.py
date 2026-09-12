@@ -71,8 +71,12 @@ class Vehicle:
             # Stopped at stationary barrier
             target_speed = 0.0
         else:
-            # Safe stopping speed accounting for lead speed: v^2 = v_lead^2 + 2 * decel * dist
-            safe_speed = (barrier_speed**2 + 2.0 * self.max_decel * dist_to_barrier) ** 0.5
+            # Safe stopping speed accounting for discrete Euler time step dt and barrier speed:
+            # Solves: dist = (delta_v^2) / (2 * decel) + delta_v * (buffer * dt)
+            # A buffer of 1.8 * dt accommodates discrete step displacement and prevents stop line overshoot
+            decel_step = self.max_decel * dt * 1.8
+            delta_v_safe = -decel_step + ((decel_step**2) + 2.0 * self.max_decel * dist_to_barrier) ** 0.5
+            safe_speed = barrier_speed + max(0.0, delta_v_safe)
             target_speed = min(self.desired_speed, safe_speed)
 
         # Acceleration / deceleration

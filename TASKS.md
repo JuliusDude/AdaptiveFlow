@@ -114,6 +114,30 @@
 
 ---
 
+## 🎯 Component G: Advanced Kinematics, Timing Optimization & Pipeline Remediation (Issues 09–13)
+
+- [x] **Task G1: Implement Active Moving/Crawling Delay Calculation (`timing_optimizer.py`, `metrics.py`) [ISSUE-09]**
+  - Calculate active in-network vehicle delay as `(t - t_arr) - (pos / v_des)` across road vehicles and entry buffer
+  - Eliminate crawling delay omission in optimizer forward evaluations and summary metrics
+- [x] **Task G2: Implement Dynamic Demand/Queue Tie-Breaking in `TimingOptimizer` [ISSUE-10]**
+  - Break plan delay ties using approach demand and queue pressure ($N+S$ vs $E+W$) instead of list insertion order
+- [x] **Task G3: Implement Discrete Euler Braking Buffer in `Vehicle.update_kinematics` [ISSUE-11]**
+  - Incorporate time-step buffer term into safe stopping speed to eliminate 1-step emergency stopping and overshoot
+- [x] **Task G4: Implement Continuous Principal Phase Timer in `TrafficSignal` [ISSUE-12]**
+  - Track `principal_phase_elapsed_time` continuously through Green, Yellow, and All-Red clearance intervals
+  - Return true continuous elapsed time in `get_feature_encoding()`
+- [x] **Task G5: Update Dashboard Delay Visualization (`src/dashboard/app.py`) [ISSUE-13]**
+  - Clearly label and plot comprehensive vehicle delay and queue metrics over time
+- [x] **Task G6: Automated Tests, Dataset Regeneration, Model Retraining & Benchmarking**
+  - Add comprehensive unit tests covering Issues 09–13 in `tests/`
+  - Re-run dataset generation (`src/ml/dataset.py`), training (`src/ml/train.py`), and evaluation benchmark (`src/ml/evaluate.py`)
+  - Verify zero regressions and validate performance metrics
+- [x] **Task G7: Document Resolutions in `ISSUES.md`, Commit & Push**
+  - Mark Issues 09–13 as RESOLVED in `ISSUES.md` with technical remediation details
+  - Perform atomic git commit and push to `origin/main`
+
+---
+
 ## ✅ Completed Tasks
 
 - [x] Create and establish `RULES.md` development standards
@@ -127,5 +151,8 @@
 - [x] Component F2: Metrics & Kinematics Remediation (Issues 01, 04, 06)
 - [x] Component F3: ML Pipeline & Controller Remediation (Issues 02, 03, 05, 07)
 - [x] Component F4: Dashboard Polish & Full Verification (Issue 08)
+- [x] Component G: Advanced Kinematics, Timing Optimization & Pipeline Remediation (Issues 09–13)
+
+
 
 
