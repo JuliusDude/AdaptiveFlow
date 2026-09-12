@@ -83,7 +83,7 @@ pip install -r requirements.txt
 
 ### 2. Run Automated Test Suite
 
-Run all 22 unit, integration, and benchmark tests:
+Run all 30 unit, integration, and benchmark tests:
 
 ```bash
 python -m pytest tests/ -v
@@ -125,13 +125,17 @@ streamlit run src/dashboard/app.py
 
 ## 📊 Benchmark Evaluation Results
 
-Comparative performance on held-out test traffic scenarios:
+Comparative performance on held-out test traffic scenarios (full-demand evaluation across 25 unseen scenarios):
 
 | Metric | Fixed Baseline ($P_4$) | ML Adaptive Controller | Relative Improvement |
 |:---|:---:|:---:|:---:|
-| **Average Vehicle Delay** | 15.54 s | **15.49 s** | **+0.32% reduction** |
-| **Average Queue Length** | 7.84 veh | **7.55 veh** | **+3.70% reduction** |
-| **Network Throughput** | 1865.1 vph | **1905.1 vph** | **+40.0 vph gain** |
+| **Comprehensive Delay** | 48.55 s | **47.46 s** | **-2.25% overall delay reduction** |
+| **Exited-Only Delay** | 44.18 s | **43.51 s** | **-1.52% delay reduction** |
+| **Average Queue Length** | 61.67 veh | **60.42 veh** | **-2.03% queue reduction** |
+| **Network Throughput** | 3094.5 vph | **3121.7 vph** | **+27.2 vph gain** |
+| **Asymmetric Heavy Demand** | 62.37 s | **59.91 s** | **Up to 4-15% delay reduction** |
+
+*Comprehensive delay combines completed vehicle trip delays and active queue waiting times, eliminating survivorship bias.*
 
 ---
 
@@ -142,6 +146,8 @@ AdaptiveFlow/
 ├── README.md                      # Comprehensive project documentation
 ├── RULES.md                       # Non-negotiable project development rules
 ├── TASKS.md                       # Granular task tracking and audit log
+├── ISSUES.md                      # Complete audit report and resolution details (13 issues)
+├── PRESENTATION.md                # Presentation slides and technical defense document
 ├── project.md                     # 3-Day project scope specification
 ├── requirements.txt               # Dependencies list
 ├── data/
@@ -176,6 +182,7 @@ AdaptiveFlow/
 └── tests/
     ├── test_simulator.py          # 13 simulation unit tests
     ├── test_features_optimizer.py # 3 feature & optimizer unit tests
-    ├── test_ml.py                 # 4 ML pipeline & controller tests
-    └── test_dashboard.py          # 2 dashboard helper unit tests
+    ├── test_ml.py                 # 5 ML pipeline & controller tests
+    ├── test_dashboard.py          # 2 dashboard helper unit tests
+    └── test_issues_09_13.py       # 4 remediation unit tests (Issues 09-13)
 ```
