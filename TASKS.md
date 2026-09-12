@@ -85,7 +85,7 @@
 
 ## 🎯 Component E: Streamlit Interactive Dashboard
 
-- [ ] **Task E1: Build Streamlit Dashboard Application (`src/dashboard/app.py`)**
+- [x] **Task E1: Build Streamlit Dashboard Application (`src/dashboard/app.py`)**
   - 4-way visual schematic of intersection, signals, and live queues
   - Telemetry cards (counts, queues, arrival rates, speeds)
   - ML recommendation panel (selected plan, green splits)
@@ -101,5 +101,6 @@
 - [x] Component A: Project Skeleton & Configuration (commit `c42e23c`)
 - [x] Component B: Traffic Simulation Engine (commit `4d4f6bf`)
 - [x] Component C: Feature Engineering & Timing Optimizer (commit `54d92f2`)
-- [x] Component D: Supervised Machine Learning Pipeline
+- [x] Component D: Supervised Machine Learning Pipeline (commit `8a1570e`)
+- [x] Component E: Streamlit Interactive Dashboard
 
