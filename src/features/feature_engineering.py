@@ -116,7 +116,7 @@ def validate_features(features: Dict[str, float]) -> bool:
     return True
 
 
-# 12 Engineered Interaction & Ratio Features (Phase A / Phase B directional balance)
+# 22 Engineered Interaction, Ratio, Critical-Lane, and Congestion Features
 ENGINEERED_FEATURE_NAMES: Tuple[str, ...] = (
     # Directional totals (Phase A vs Phase B)
     "NS_count_total",
@@ -125,7 +125,7 @@ ENGINEERED_FEATURE_NAMES: Tuple[str, ...] = (
     "EW_queue_total",
     "NS_arrival_total",
     "EW_arrival_total",
-    # Directional ratios (North-South fraction of total demand)
+    # Directional ratios (North-South fraction of total)
     "demand_ratio_ns",
     "queue_ratio_ns",
     "arrival_ratio_ns",
@@ -133,6 +133,20 @@ ENGINEERED_FEATURE_NAMES: Tuple[str, ...] = (
     "count_diff_ns_ew",
     "queue_diff_ns_ew",
     "arrival_diff_ns_ew",
+    # Webster's Critical Lane Demand (heaviest approach per phase determines green requirement)
+    "critical_demand_ns",
+    "critical_demand_ew",
+    "critical_queue_ns",
+    "critical_queue_ew",
+    "critical_demand_ratio",
+    # Within-phase approach asymmetry
+    "ns_internal_asymmetry",
+    "ew_internal_asymmetry",
+    # Speed deficiency indices (0 = free flow, 1 = standstill at 13.89 m/s)
+    "speed_deficiency_ns",
+    "speed_deficiency_ew",
+    # Link storage saturation ratio (150m / 6.5m ≈ 23 vehicles capacity)
+    "queue_storage_ratio_max",
 )
 
 ALL_FEATURE_NAMES: Tuple[str, ...] = FEATURE_NAMES + ENGINEERED_FEATURE_NAMES
@@ -141,22 +155,39 @@ ALL_FEATURE_NAMES: Tuple[str, ...] = FEATURE_NAMES + ENGINEERED_FEATURE_NAMES
 def compute_engineered_features(
     features_input: Union[pd.DataFrame, np.ndarray, Dict[str, float]]
 ) -> Union[pd.DataFrame, np.ndarray, Dict[str, float]]:
-    """Compute 12 directional interaction and ratio features from the 22 canonical features.
+    """Compute 22 directional interaction, ratio, critical-lane, and congestion features.
 
-    Derives Phase A (N+S) vs Phase B (E+W) sums, demand/queue/arrival ratios,
-    and net pressure differentials.
+    Derives Phase A vs Phase B totals, demand/queue/arrival ratios, critical lane bottleneck demands,
+    within-phase asymmetries, and dimensionless congestion indices.
     """
     if isinstance(features_input, dict):
-        ns_count = float(features_input["N_count"] + features_input["S_count"])
-        ew_count = float(features_input["E_count"] + features_input["W_count"])
-        ns_q = float(features_input["N_queue"] + features_input["S_queue"])
-        ew_q = float(features_input["E_queue"] + features_input["W_queue"])
-        ns_arr = float(features_input["N_arrival"] + features_input["S_arrival"])
-        ew_arr = float(features_input["E_arrival"] + features_input["W_arrival"])
+        n_c, s_c = float(features_input["N_count"]), float(features_input["S_count"])
+        e_c, w_c = float(features_input["E_count"]), float(features_input["W_count"])
+        n_q, s_q = float(features_input["N_queue"]), float(features_input["S_queue"])
+        e_q, w_q = float(features_input["E_queue"]), float(features_input["W_queue"])
+        n_arr, s_arr = float(features_input["N_arrival"]), float(features_input["S_arrival"])
+        e_arr, w_arr = float(features_input["E_arrival"]), float(features_input["W_arrival"])
+        n_spd, s_spd = float(features_input["N_speed"]), float(features_input["S_speed"])
+        e_spd, w_spd = float(features_input["E_speed"]), float(features_input["W_speed"])
 
-        tot_count = ns_count + ew_count
-        tot_q = ns_q + ew_q
-        tot_arr = ns_arr + ew_arr
+        ns_count = n_c + s_c
+        ew_count = e_c + w_c
+        ns_q = n_q + s_q
+        ew_q = e_q + w_q
+        ns_arr = n_arr + s_arr
+        ew_arr = e_arr + w_arr
+
+        tot_count = max(0.1, ns_count + ew_count)
+        tot_q = max(0.1, ns_q + ew_q)
+        tot_arr = max(0.1, ns_arr + ew_arr)
+
+        crit_ns = max(n_c, s_c)
+        crit_ew = max(e_c, w_c)
+        crit_q_ns = max(n_q, s_q)
+        crit_q_ew = max(e_q, w_q)
+        crit_tot = max(0.1, crit_ns + crit_ew)
+
+        max_q = max(n_q, s_q, e_q, w_q)
 
         engineered = {
             "NS_count_total": ns_count,
@@ -165,12 +196,22 @@ def compute_engineered_features(
             "EW_queue_total": ew_q,
             "NS_arrival_total": ns_arr,
             "EW_arrival_total": ew_arr,
-            "demand_ratio_ns": ns_count / max(0.1, tot_count),
-            "queue_ratio_ns": ns_q / max(0.1, tot_q),
-            "arrival_ratio_ns": ns_arr / max(0.1, tot_arr),
+            "demand_ratio_ns": ns_count / tot_count,
+            "queue_ratio_ns": ns_q / tot_q,
+            "arrival_ratio_ns": ns_arr / tot_arr,
             "count_diff_ns_ew": ns_count - ew_count,
             "queue_diff_ns_ew": ns_q - ew_q,
             "arrival_diff_ns_ew": ns_arr - ew_arr,
+            "critical_demand_ns": crit_ns,
+            "critical_demand_ew": crit_ew,
+            "critical_queue_ns": crit_q_ns,
+            "critical_queue_ew": crit_q_ew,
+            "critical_demand_ratio": crit_ns / crit_tot,
+            "ns_internal_asymmetry": abs(n_c - s_c),
+            "ew_internal_asymmetry": abs(e_c - w_c),
+            "speed_deficiency_ns": max(0.0, 1.0 - (n_spd + s_spd) / (2.0 * 13.89)),
+            "speed_deficiency_ew": max(0.0, 1.0 - (e_spd + w_spd) / (2.0 * 13.89)),
+            "queue_storage_ratio_max": min(1.0, max_q / 23.0),
         }
         res = dict(features_input)
         res.update(engineered)
@@ -178,16 +219,33 @@ def compute_engineered_features(
 
     elif isinstance(features_input, pd.DataFrame):
         df = features_input.copy()
-        ns_count = df["N_count"] + df["S_count"]
-        ew_count = df["E_count"] + df["W_count"]
-        ns_q = df["N_queue"] + df["S_queue"]
-        ew_q = df["E_queue"] + df["W_queue"]
-        ns_arr = df["N_arrival"] + df["S_arrival"]
-        ew_arr = df["E_arrival"] + df["W_arrival"]
+        n_c, s_c = df["N_count"], df["S_count"]
+        e_c, w_c = df["E_count"], df["W_count"]
+        n_q, s_q = df["N_queue"], df["S_queue"]
+        e_q, w_q = df["E_queue"], df["W_queue"]
+        n_arr, s_arr = df["N_arrival"], df["S_arrival"]
+        e_arr, w_arr = df["E_arrival"], df["W_arrival"]
+        n_spd, s_spd = df["N_speed"], df["S_speed"]
+        e_spd, w_spd = df["E_speed"], df["W_speed"]
+
+        ns_count = n_c + s_c
+        ew_count = e_c + w_c
+        ns_q = n_q + s_q
+        ew_q = e_q + w_q
+        ns_arr = n_arr + s_arr
+        ew_arr = e_arr + w_arr
 
         tot_count = np.maximum(0.1, ns_count + ew_count)
         tot_q = np.maximum(0.1, ns_q + ew_q)
         tot_arr = np.maximum(0.1, ns_arr + ew_arr)
+
+        crit_ns = np.maximum(n_c, s_c)
+        crit_ew = np.maximum(e_c, w_c)
+        crit_q_ns = np.maximum(n_q, s_q)
+        crit_q_ew = np.maximum(e_q, w_q)
+        crit_tot = np.maximum(0.1, crit_ns + crit_ew)
+
+        max_q = np.maximum(np.maximum(n_q, s_q), np.maximum(e_q, w_q))
 
         df["NS_count_total"] = ns_count.astype(np.float32)
         df["EW_count_total"] = ew_count.astype(np.float32)
@@ -201,13 +259,19 @@ def compute_engineered_features(
         df["count_diff_ns_ew"] = (ns_count - ew_count).astype(np.float32)
         df["queue_diff_ns_ew"] = (ns_q - ew_q).astype(np.float32)
         df["arrival_diff_ns_ew"] = (ns_arr - ew_arr).astype(np.float32)
+        df["critical_demand_ns"] = crit_ns.astype(np.float32)
+        df["critical_demand_ew"] = crit_ew.astype(np.float32)
+        df["critical_queue_ns"] = crit_q_ns.astype(np.float32)
+        df["critical_queue_ew"] = crit_q_ew.astype(np.float32)
+        df["critical_demand_ratio"] = (crit_ns / crit_tot).astype(np.float32)
+        df["ns_internal_asymmetry"] = (n_c - s_c).abs().astype(np.float32)
+        df["ew_internal_asymmetry"] = (e_c - w_c).abs().astype(np.float32)
+        df["speed_deficiency_ns"] = np.clip(1.0 - (n_spd + s_spd) / (2.0 * 13.89), 0.0, 1.0).astype(np.float32)
+        df["speed_deficiency_ew"] = np.clip(1.0 - (e_spd + w_spd) / (2.0 * 13.89), 0.0, 1.0).astype(np.float32)
+        df["queue_storage_ratio_max"] = np.clip(max_q / 23.0, 0.0, 1.0).astype(np.float32)
         return df
 
     elif isinstance(features_input, np.ndarray):
-        # Assumes canonical order of 22 features
-        # N_count=0, S_count=1, E_count=2, W_count=3
-        # N_queue=4, S_queue=5, E_queue=6, W_queue=7
-        # N_arrival=8, S_arrival=9, E_arrival=10, W_arrival=11
         if features_input.ndim == 1:
             x_2d = features_input.reshape(1, -1)
             was_1d = True
@@ -215,16 +279,29 @@ def compute_engineered_features(
             x_2d = features_input
             was_1d = False
 
-        ns_count = x_2d[:, 0] + x_2d[:, 1]
-        ew_count = x_2d[:, 2] + x_2d[:, 3]
-        ns_q = x_2d[:, 4] + x_2d[:, 5]
-        ew_q = x_2d[:, 6] + x_2d[:, 7]
-        ns_arr = x_2d[:, 8] + x_2d[:, 9]
-        ew_arr = x_2d[:, 10] + x_2d[:, 11]
+        n_c, s_c, e_c, w_c = x_2d[:, 0], x_2d[:, 1], x_2d[:, 2], x_2d[:, 3]
+        n_q, s_q, e_q, w_q = x_2d[:, 4], x_2d[:, 5], x_2d[:, 6], x_2d[:, 7]
+        n_arr, s_arr, e_arr, w_arr = x_2d[:, 8], x_2d[:, 9], x_2d[:, 10], x_2d[:, 11]
+        n_spd, s_spd, e_spd, w_spd = x_2d[:, 12], x_2d[:, 13], x_2d[:, 14], x_2d[:, 15]
+
+        ns_count = n_c + s_c
+        ew_count = e_c + w_c
+        ns_q = n_q + s_q
+        ew_q = e_q + w_q
+        ns_arr = n_arr + s_arr
+        ew_arr = e_arr + w_arr
 
         tot_count = np.maximum(0.1, ns_count + ew_count)
         tot_q = np.maximum(0.1, ns_q + ew_q)
         tot_arr = np.maximum(0.1, ns_arr + ew_arr)
+
+        crit_ns = np.maximum(n_c, s_c)
+        crit_ew = np.maximum(e_c, w_c)
+        crit_q_ns = np.maximum(n_q, s_q)
+        crit_q_ew = np.maximum(e_q, w_q)
+        crit_tot = np.maximum(0.1, crit_ns + crit_ew)
+
+        max_q = np.maximum(np.maximum(n_q, s_q), np.maximum(e_q, w_q))
 
         eng = np.column_stack([
             ns_count,
@@ -239,6 +316,16 @@ def compute_engineered_features(
             ns_count - ew_count,
             ns_q - ew_q,
             ns_arr - ew_arr,
+            crit_ns,
+            crit_ew,
+            crit_q_ns,
+            crit_q_ew,
+            crit_ns / crit_tot,
+            np.abs(n_c - s_c),
+            np.abs(e_c - w_c),
+            np.clip(1.0 - (n_spd + s_spd) / (2.0 * 13.89), 0.0, 1.0),
+            np.clip(1.0 - (e_spd + w_spd) / (2.0 * 13.89), 0.0, 1.0),
+            np.clip(max_q / 23.0, 0.0, 1.0),
         ]).astype(np.float32)
 
         out = np.hstack([x_2d, eng])

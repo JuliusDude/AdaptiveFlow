@@ -185,7 +185,7 @@
   - Implement Yellow phase dilemma zone clearance logic in `signal.py` / `intersection.py` / `vehicle.py`
   - Verify with unit tests
 
-- [ ] **Task J2: Feature Engineering & Critical Lane Features**
+- [x] **Task J2: Feature Engineering & Critical Lane Features**
   - Add Webster's critical lane demand (`max(N,S)`, `max(E,W)`, critical demand ratio)
   - Add internal within-phase approach asymmetry (`|N-S|`, `|E-W|`) and queue storage ratios
   - Update `TrafficFeatureTransformer` and test feature integrity
