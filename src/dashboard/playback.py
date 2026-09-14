@@ -34,6 +34,9 @@ class SimulationPlaybackBuffer:
         self.sim_ml: Optional[IntersectionSimulation] = None
         self.ml_controller: Optional[AdaptiveMLController] = None
 
+        self.departing_ml: List[Dict[str, Any]] = []
+        self.departing_fixed: List[Dict[str, Any]] = []
+
         self.frames: List[Dict[str, Any]] = []
         self.reset(preset, custom_rates, seed)
 
@@ -47,6 +50,9 @@ class SimulationPlaybackBuffer:
         self.preset = preset
         self.custom_rates = custom_rates
         self.seed = seed
+
+        self.departing_ml = []
+        self.departing_fixed = []
 
         rates = (
             custom_rates
@@ -79,36 +85,66 @@ class SimulationPlaybackBuffer:
         active_plan = signal.current_plan_name
         plan_info = TIMING_PLANS.get(active_plan, {"NS": 30, "EW": 30})
 
-        # Determine remaining seconds in current phase
+        # Determine remaining seconds for NS and EW
         cur_phase = signal.current_phase
         if cur_phase == SignalPhase.PHASE_A_GREEN:
+            ns_rem = max(0.0, signal.plan["NS"] - signal.phase_elapsed_time)
+            ew_rem = ns_rem + signal.yellow_duration + signal.all_red_duration
             dur = signal.plan["NS"]
         elif cur_phase == SignalPhase.PHASE_A_YELLOW:
+            ns_rem = max(0.0, signal.yellow_duration - signal.phase_elapsed_time)
+            ew_rem = ns_rem + signal.all_red_duration
             dur = signal.yellow_duration
         elif cur_phase == SignalPhase.PHASE_A_ALL_RED:
+            ns_rem = max(0.0, signal.all_red_duration - signal.phase_elapsed_time)
+            ew_rem = ns_rem
             dur = signal.all_red_duration
         elif cur_phase == SignalPhase.PHASE_B_GREEN:
+            ew_rem = max(0.0, signal.plan["EW"] - signal.phase_elapsed_time)
+            ns_rem = ew_rem + signal.yellow_duration + signal.all_red_duration
             dur = signal.plan["EW"]
         elif cur_phase == SignalPhase.PHASE_B_YELLOW:
+            ew_rem = max(0.0, signal.yellow_duration - signal.phase_elapsed_time)
+            ns_rem = ew_rem + signal.all_red_duration
             dur = signal.yellow_duration
         else:
+            ew_rem = max(0.0, signal.all_red_duration - signal.phase_elapsed_time)
+            ns_rem = ew_rem
             dur = signal.all_red_duration
 
         remaining = max(0.0, dur - signal.phase_elapsed_time)
 
-        # Vehicles
+        # Vehicles: active vehicles + departing vehicles clearing the junction
         v_list = []
         for app in ["N", "S", "E", "W"]:
             for v in sim.vehicles[app]:
-                if v.state != "exited":
-                    v_list.append({
-                        "id": v.id,
-                        "app": v.approach,
-                        "pos": round(v.position, 2),
-                        "spd": round(v.speed, 2),
-                        "st": v.state,
-                        "wt": round(v.wait_time, 1),
-                    })
+                v_list.append({
+                    "id": v.id,
+                    "app": v.approach,
+                    "pos": round(v.position, 2),
+                    "spd": round(v.speed, 2),
+                    "st": v.state,
+                    "wt": round(v.wait_time, 1),
+                })
+
+        # Track recently exited vehicles so they visibly clear off-screen rather than vanishing
+        departing_store = self.departing_ml if is_ml else self.departing_fixed
+        # Update existing departing
+        next_departing = []
+        for dep in departing_store:
+            dep["pos"] += max(8.0, dep["spd"]) * 1.0
+            if dep["pos"] < 230.0:
+                next_departing.append(dep)
+                v_list.append({
+                    "id": dep["id"],
+                    "app": dep["app"],
+                    "pos": round(dep["pos"], 2),
+                    "spd": round(dep["spd"], 2),
+                    "st": "exited",
+                    "wt": 0.0,
+                })
+        departing_store.clear()
+        departing_store.extend(next_departing)
 
         summary = sim.get_summary()
         comp_delay = summary.get("comprehensive_delay", summary["average_delay"])
@@ -117,6 +153,8 @@ class SimulationPlaybackBuffer:
             "phase_name": cur_phase.value,
             "ns_color": ns_color,
             "ew_color": ew_color,
+            "ns_timer": round(ns_rem, 1),
+            "ew_timer": round(ew_rem, 1),
             "phase_elapsed": round(signal.phase_elapsed_time, 1),
             "phase_duration": round(dur, 1),
             "remaining": round(remaining, 1),
@@ -159,9 +197,34 @@ class SimulationPlaybackBuffer:
 
     def step(self, dt: float = 1.0) -> None:
         """Advance both simulations by dt and record a frame."""
+        ml_before = {v.id: v for app in self.sim_ml.vehicles for v in self.sim_ml.vehicles[app]}
+        fixed_before = {v.id: v for app in self.sim_fixed.vehicles for v in self.sim_fixed.vehicles[app]}
+
         self.sim_fixed.step(dt=dt)
         self.sim_ml.step(dt=dt)
         self.ml_controller.update(self.sim_ml)
+
+        # Detect newly exited vehicles so they can finish driving off-screen
+        ml_after_ids = {v.id for app in self.sim_ml.vehicles for v in self.sim_ml.vehicles[app]}
+        for vid, v in ml_before.items():
+            if vid not in ml_after_ids and v.position >= 150.0:
+                self.departing_ml.append({
+                    "id": v.id,
+                    "app": v.approach,
+                    "pos": 170.0,
+                    "spd": max(10.0, v.speed),
+                })
+
+        fixed_after_ids = {v.id for app in self.sim_fixed.vehicles for v in self.sim_fixed.vehicles[app]}
+        for vid, v in fixed_before.items():
+            if vid not in fixed_after_ids and v.position >= 150.0:
+                self.departing_fixed.append({
+                    "id": v.id,
+                    "app": v.approach,
+                    "pos": 170.0,
+                    "spd": max(10.0, v.speed),
+                })
+
         self._record_frame()
 
     def buffer_horizon(self, seconds: int = 140) -> None:
