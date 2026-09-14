@@ -308,7 +308,10 @@ def main() -> None:
         if "feature_importances" in train_metrics:
             top_feats = list(train_metrics["feature_importances"].items())[:6]
             imp_df = pd.DataFrame(top_feats, columns=["Feature", "Importance"]).set_index("Feature")
-            st.bar_chart(imp_df, horizontal=True)
+            try:
+                st.bar_chart(imp_df, horizontal=True)
+            except TypeError:
+                st.bar_chart(imp_df)
         else:
             st.caption("Training metrics not found. Run model training to view feature importances.")
 
