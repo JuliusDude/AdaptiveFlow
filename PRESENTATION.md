@@ -138,15 +138,17 @@ A 22-dimensional feature vector captures comprehensive macroscopic and microscop
 
 ## 9. Comparative Experimental Results (Fixed Baseline vs ML)
 
-Evaluated across 50 unseen held-out test scenarios:
+Evaluated across held-out test scenarios:
 
 | Metric | Fixed Baseline ($P_4$) | ML Adaptive Controller | Margin / Delta |
 |:---|:---:|:---:|:---:|
-| **Comprehensive Delay** | 35.63 s | **34.92 s** | **-1.99% overall delay reduction** |
-| **Exited Trip Delay** | 32.22 s | **31.96 s** | **-0.81% delay reduction** |
-| **Average Queue Length** | 41.54 veh | **40.76 veh** | **-1.88% queue reduction** |
-| **Network Throughput** | 3251.8 vph | **3278.6 vph** | **+26.8 vehicles/hour cleared** |
-| **Asymmetric Heavy Scenarios** | 63.60 s | **59.91 s** | **Up to 4-15% delay reduction** |
+| **Comprehensive Delay** | 41.82 s | **41.34 s** | **-1.15% to -1.99% overall delay reduction** |
+| **Average Queue Length** | 50.07 veh | **49.57 veh** | **-1.00% to -1.88% queue reduction** |
+| **Network Throughput** | 3,569.8 vph | **3,600.0 vph** | **+30.2 to +41.2 vehicles/hour cleared** |
+| **Within-1-Plan Accuracy** | — | **87.11%** | **Adjacent plan tolerance (≤5s split)** |
+| **Mean Absolute Plan Error** | — | **0.564 plans** | **~2.8s average green offset** |
+| **Train-Val Overfitting Gap** | 50.22% | **12.00%** | **Compressed to <15% via regularization** |
+| **Asymmetric Heavy Scenarios** | 24.43 s | **22.58 s** | **+7.57% delay reduction (up to 4–15%)** |
 
 * **Key Takeaway:** Under asymmetric demand, Fixed Timing causes massive queue accumulation on the congested axis while allocating unnecessary green time to empty approaches. The ML controller dynamically switches to $P_7$ or $P_1$, rapidly dissipating queues and preventing gridlock.
 

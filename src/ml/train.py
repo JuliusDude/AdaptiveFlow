@@ -151,6 +151,13 @@ def train_model(
     conf_mat = confusion_matrix(y_val, y_val_pred, labels=champion_pipeline.classes_).tolist()
     report = classification_report(y_val, y_val_pred, output_dict=True, zero_division=0)
 
+    # Traffic-aware plan distance metrics (evaluates adjacent plan correctness)
+    y_val_num = np.array([int(p[1:]) for p in y_val])
+    y_val_pred_num = np.array([int(p[1:]) for p in y_val_pred])
+    plan_diffs = np.abs(y_val_num - y_val_pred_num)
+    val_within_1_plan_acc = float(np.mean(plan_diffs <= 1))
+    val_mean_plan_error = float(np.mean(plan_diffs))
+
     # 6. Extract Feature Importances across all 44 features
     clf = champion_pipeline.named_steps["classifier"]
     if hasattr(clf, "feature_importances_"):
@@ -185,6 +192,8 @@ def train_model(
         "hgb_cv_macro_f1_std": round(float(hgb_cv_scores.std()), 4),
         "train_accuracy": round(float(train_acc), 4),
         "val_accuracy": round(float(val_acc), 4),
+        "val_within_1_plan_accuracy": round(val_within_1_plan_acc, 4),
+        "val_mean_plan_error": round(val_mean_plan_error, 4),
         "val_macro_f1": round(float(val_f1), 4),
         "classes": list(champion_pipeline.classes_),
         "confusion_matrix": conf_mat,

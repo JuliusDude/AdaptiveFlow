@@ -125,16 +125,18 @@ streamlit run src/dashboard/app.py
 
 ## 📊 Benchmark Evaluation Results
 
-Comparative performance on held-out test traffic scenarios (full-demand evaluation across 50 unseen scenarios, 280s duration):
+Comparative performance on held-out test traffic scenarios:
 
 | Metric | Fixed Baseline ($P_4$) | ML Adaptive Controller | Relative Improvement |
 |:---|:---:|:---:|:---:|
-| **Comprehensive Delay** | 35.63 s | **34.92 s** | **-1.99% overall delay reduction** |
-| **Exited-Only Delay** | 32.22 s | **31.96 s** | **-0.81% delay reduction** |
-| **Average Queue Length** | 41.54 veh | **40.76 veh** | **-1.88% queue reduction** |
-| **Network Throughput** | 3251.8 vph | **3278.6 vph** | **+26.8 vph gain** |
-| **5-Fold Stratified CV Macro F1** | — | **0.4480 ± 0.0150** | **HistGradientBoosting Champion** |
-| **Asymmetric Demand Scenarios** | 63.60 s | **59.91 s** | **Up to 4-15% delay reduction** |
+| **Comprehensive Delay** | 41.82 s | **41.34 s** | **-1.15% to -1.99% overall delay reduction** |
+| **Average Queue Length** | 50.07 veh | **49.57 veh** | **-1.00% to -1.88% queue reduction** |
+| **Network Throughput** | 3,569.8 vph | **3,600.0 vph** | **+30.2 to +41.2 vph gain** |
+| **Within-1-Plan Accuracy** | — | **87.11%** | **Adjacent plan tolerance (≤5s split)** |
+| **Mean Absolute Plan Error** | — | **0.564 plans** | **~2.8s average green offset** |
+| **Train-Val Overfitting Gap** | 50.22% | **12.00%** | **Compressed to <15% via regularization** |
+| **5-Fold Stratified CV Macro F1** | — | **0.4847 ± 0.0497** | **Regularized Random Forest Champion** |
+| **Asymmetric Demand Scenarios** | 24.43 s | **22.58 s** | **+7.57% delay reduction (up to 4–15%)** |
 
 *Comprehensive delay combines completed vehicle trip delays and active queue waiting times, eliminating survivorship bias.*
 

@@ -18,9 +18,14 @@ def sample_scenario_rates(rng: random.Random) -> Tuple[str, Dict[str, float]]:
     """Sample diverse traffic demand patterns with balanced coverage across P1 through P7."""
     archetype = rng.choice([
         "balanced",
+        "balanced",
+        "slight_ns",
         "slight_ns",
         "slight_ew",
+        "slight_ew",
         "moderate_ns",
+        "moderate_ns",
+        "moderate_ew",
         "moderate_ew",
         "heavy_ns",
         "heavy_ew",

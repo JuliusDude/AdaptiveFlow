@@ -184,6 +184,53 @@ def evaluate_benchmark(
             "delay_reduction_pct": delay_improvement_pct,
             "queue_reduction_pct": queue_improvement_pct,
             "throughput_gain_vph": round(avg_m_tp - avg_f_tp, 1),
+            "asymmetric_delay_reduction_pct": round(
+                (
+                    (
+                        sum(
+                            s["fixed_comprehensive_delay"]
+                            for s in scenario_details
+                            if abs((s["rates"]["N"] + s["rates"]["S"]) - (s["rates"]["E"] + s["rates"]["W"])) >= 8.0
+                        )
+                        / max(
+                            1,
+                            len([
+                                s for s in scenario_details
+                                if abs((s["rates"]["N"] + s["rates"]["S"]) - (s["rates"]["E"] + s["rates"]["W"])) >= 8.0
+                            ]),
+                        )
+                        - sum(
+                            s["ml_comprehensive_delay"]
+                            for s in scenario_details
+                            if abs((s["rates"]["N"] + s["rates"]["S"]) - (s["rates"]["E"] + s["rates"]["W"])) >= 8.0
+                        )
+                        / max(
+                            1,
+                            len([
+                                s for s in scenario_details
+                                if abs((s["rates"]["N"] + s["rates"]["S"]) - (s["rates"]["E"] + s["rates"]["W"])) >= 8.0
+                            ]),
+                        )
+                    )
+                    / max(
+                        0.1,
+                        sum(
+                            s["fixed_comprehensive_delay"]
+                            for s in scenario_details
+                            if abs((s["rates"]["N"] + s["rates"]["S"]) - (s["rates"]["E"] + s["rates"]["W"])) >= 8.0
+                        )
+                        / max(
+                            1,
+                            len([
+                                s for s in scenario_details
+                                if abs((s["rates"]["N"] + s["rates"]["S"]) - (s["rates"]["E"] + s["rates"]["W"])) >= 8.0
+                            ]),
+                        ),
+                    )
+                )
+                * 100.0,
+                2,
+            ) if any(abs((s["rates"]["N"] + s["rates"]["S"]) - (s["rates"]["E"] + s["rates"]["W"])) >= 8.0 for s in scenario_details) else delay_improvement_pct,
         },
         "scenario_details": scenario_details,
     }

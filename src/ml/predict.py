@@ -152,7 +152,12 @@ class AdaptiveMLController:
                 top_conf = probs.get(plan, 0.0)
 
                 # Stability Guard 1: In near-balanced demand, lock to P4 to avoid micro-flapping
-                if (0.45 <= demand_ratio <= 0.55 and abs(ns_q - ew_q) <= 2) or (top_conf < self.confidence_threshold and abs(ns_vol - ew_vol) <= 4):
+                is_balanced = (
+                    (0.42 <= demand_ratio <= 0.58 and abs(ns_q - ew_q) <= 4)
+                    or (abs(ns_vol - ew_vol) <= 4 and abs(ns_q - ew_q) <= 5)
+                    or (top_conf < self.confidence_threshold and abs(ns_vol - ew_vol) <= 6)
+                )
+                if is_balanced:
                     plan = "P4"
                 elif sim.current_time > 0 and sim.signal.current_plan_name:
                     # Stability Guard 2: Hysteresis slew-rate limiter
