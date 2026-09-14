@@ -147,6 +147,35 @@
 
 ---
 
+## 🎯 Component I: Optimization & Efficiency Improvements (RULES.md Compliance)
+
+- [x] **Task I1: Feature Transformation Pipeline with Interaction & Ratio Features**
+  - Add feature transformer generating directional sums and critical ratios (demand ratio, queue ratio, arrival ratio)
+  - Ensure compatibility with existing 22-feature simulator extraction
+  - Unit test feature transformation and pipeline compatibility
+
+- [ ] **Task I2: Optimizer & Horizon Alignment in Dataset Generation**
+  - Align forward evaluation horizon to 140s (2 full cycles) to prevent myopic single-cycle bias
+  - Rebalance archetype generation to strengthen intermediate classes ($P_2, P_3, P_5, P_6$)
+  - Generate expanded, balanced dataset (1000 scenarios) with multiprocessing
+
+- [ ] **Task I3: Model Optimization, Hyperparameter Regularization & Training**
+  - Implement tuned, regularized model pipeline with `class_weight='balanced'`
+  - Prevent extreme overfitting (closing 55% train-val gap) and eliminate zero-F1 class collapse
+  - Train model, evaluate metrics, and serialize artifact to `models/random_forest.pkl`
+
+- [ ] **Task I4: Controller Performance Optimization & Confidence Thresholding**
+  - Eliminate duplicate inference calls and optimize NumPy inference speed in `src/ml/predict.py`
+  - Implement confidence thresholding to prevent spurious switching under balanced demand
+  - Optimize `src/ml/evaluate.py` to reuse predictor instance and avoid disk reload in loop
+
+- [ ] **Task I5: Multi-Scenario Benchmark Re-evaluation, Test Suite Verification & Documentation**
+  - Run full benchmark evaluation across held-out test scenarios and measure delay reduction
+  - Execute full test suite (`pytest tests/ -v`) verifying zero regressions
+  - Update `results/metrics/`, `README.md`, and `TASKS.md` with final verified performance
+
+---
+
 ## ✅ Completed Tasks
 
 - [x] Create and establish `RULES.md` development standards
@@ -162,6 +191,7 @@
 - [x] Component F4: Dashboard Polish & Full Verification (Issue 08)
 - [x] Component G: Advanced Kinematics, Timing Optimization & Pipeline Remediation (Issues 09–13)
 - [x] Component H: Project Presentation & Final Delivery (`PRESENTATION.md`, `README.md`)
+
 
 
 

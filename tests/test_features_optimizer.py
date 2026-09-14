@@ -89,3 +89,40 @@ def test_timing_optimizer_asymmetric_demand():
     )
     # Delay under P1 should be strictly less than under P7
     assert delays_e["P1"] < delays_e["P7"]
+
+
+def test_engineered_features_and_transformer():
+    from src.features.feature_engineering import (
+        ENGINEERED_FEATURE_NAMES,
+        ALL_FEATURE_NAMES,
+        compute_engineered_features,
+        TrafficFeatureTransformer,
+    )
+
+    sim = IntersectionSimulation(seed=42)
+    features = extract_features(sim)
+    assert len(features) == 22
+
+    # 1. Dict transformation
+    enriched_dict = compute_engineered_features(features)
+    assert len(enriched_dict) == 34
+    for eng_name in ENGINEERED_FEATURE_NAMES:
+        assert eng_name in enriched_dict
+
+    # 2. DataFrame transformation
+    df_in = features_to_dataframe([features, features])
+    transformer = TrafficFeatureTransformer()
+    df_out = transformer.transform(df_in)
+    assert isinstance(df_out, pd.DataFrame)
+    assert df_out.shape == (2, 34)
+    for col in ALL_FEATURE_NAMES:
+        assert col in df_out.columns
+
+    # 3. NumPy 2D and 1D transformation
+    vec = features_to_vector(features)
+    vec_out_1d = transformer.transform(vec)
+    assert vec_out_1d.shape == (34,)
+
+    vec_out_2d = transformer.transform(np.vstack([vec, vec]))
+    assert vec_out_2d.shape == (2, 34)
+
