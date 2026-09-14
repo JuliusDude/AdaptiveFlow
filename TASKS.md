@@ -190,10 +190,10 @@
   - Add internal within-phase approach asymmetry (`|N-S|`, `|E-W|`) and queue storage ratios
   - Update `TrafficFeatureTransformer` and test feature integrity
 
-- [ ] **Task J3: Multi-Snapshot Dataset Augmentation & Stratified Splitting**
+- [x] **Task J3: Multi-Snapshot Dataset Augmentation & Stratified Splitting**
   - Update `src/ml/dataset.py` to capture multiple cycle boundary snapshots per scenario
   - Implement stratified train/val/test splitting to guarantee balanced class distributions
-  - Generate augmented, high-density training dataset
+  - Generate augmented, high-density training dataset (1,500 samples: 1050 train / 225 val / 225 test)
 
 - [ ] **Task J4: Strong Regularization & Model Comparison (RF vs HistGradientBoosting)**
   - Implement regularized training with `max_depth=5`, `min_samples_leaf=6`, `min_samples_split=10`, `n_estimators=400`
