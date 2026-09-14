@@ -166,7 +166,7 @@ class TimingOptimizer:
     def evaluate_scenario(
         self,
         preset_or_rates: Union[str, Dict[str, float]],
-        warmup_steps: int = 40,
+        warmup_steps: int = 70,
         horizon_steps: int = 140,
         seed: Optional[int] = 42,
     ) -> Tuple[Dict[str, float], str, Dict[str, float]]:

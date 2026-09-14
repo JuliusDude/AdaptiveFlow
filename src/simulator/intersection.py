@@ -111,16 +111,25 @@ class IntersectionSimulation:
             self.vehicles[app].sort(key=lambda veh: veh.position, reverse=True)
 
             can_proceed = self.signal.can_proceed(app)
+            is_yellow = self.signal.is_yellow(app)
             active_list: List[Vehicle] = []
             speeds_this_step: List[float] = []
 
             lead_veh: Optional[Vehicle] = None
             for veh in self.vehicles[app]:
+                # Dilemma zone clearance: vehicles that cannot stop safely at <=3.5 m/s^2 may clear on yellow
+                veh_can_proceed = can_proceed
+                if is_yellow and veh.position < self.stop_line_pos:
+                    dist_to_stop = self.stop_line_pos - veh.position
+                    req_decel = (veh.speed ** 2) / (2.0 * max(0.5, dist_to_stop))
+                    if req_decel > 3.5 and dist_to_stop < (veh.speed * 2.0):
+                        veh_can_proceed = True
+
                 veh.update_kinematics(
                     dt=dt,
                     stop_line_pos=self.stop_line_pos,
                     intersection_end_pos=self.intersection_end_pos,
-                    can_proceed=can_proceed,
+                    can_proceed=veh_can_proceed,
                     lead_vehicle=lead_veh,
                 )
 
@@ -135,13 +144,17 @@ class IntersectionSimulation:
 
             self.vehicles[app] = active_list
 
-            # Release vehicles from entry buffer if space is clear (rearmost position >= 6.5m)
+            # Release vehicles from entry buffer if space is clear (O(1) rearmost check >= 6.5m)
             while self.entry_buffers[app]:
-                rearmost_pos = min((v.position for v in self.vehicles[app]), default=float("inf"))
+                rearmost_pos = self.vehicles[app][-1].position if self.vehicles[app] else float("inf")
                 if rearmost_pos >= 6.5:
                     v_entry = self.entry_buffers[app].popleft()
                     v_entry.position = 0.0
-                    v_entry.speed = 0.0
+                    # Preserve approach speed if vehicle entered directly without queuing in buffer
+                    if v_entry.wait_time == 0.0:
+                        v_entry.speed = min(v_entry.desired_speed * 0.7, max(5.0, v_entry.speed))
+                    else:
+                        v_entry.speed = 0.0
                     v_entry.state = "approaching"
                     self.vehicles[app].append(v_entry)
                 else:

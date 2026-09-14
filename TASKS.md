@@ -176,6 +176,42 @@
 
 ---
 
+## 🎯 Component J: Comprehensive Efficiency Improvements (from docs/implement_report.md)
+
+- [x] **Task J1: Immediate Code-Level Bug Fixes & Simulation Kinematics**
+  - Fix default `warmup_steps=70` in `timing_optimizer.py`
+  - Fix $O(N)$ rearmost position scan to $O(1)$ in `intersection.py`
+  - Fix dead-stop spawn bug in `intersection.py` (preserve initial approach speed)
+  - Implement Yellow phase dilemma zone clearance logic in `signal.py` / `intersection.py` / `vehicle.py`
+  - Verify with unit tests
+
+- [ ] **Task J2: Feature Engineering & Critical Lane Features**
+  - Add Webster's critical lane demand (`max(N,S)`, `max(E,W)`, critical demand ratio)
+  - Add internal within-phase approach asymmetry (`|N-S|`, `|E-W|`) and queue storage ratios
+  - Update `TrafficFeatureTransformer` and test feature integrity
+
+- [ ] **Task J3: Multi-Snapshot Dataset Augmentation & Stratified Splitting**
+  - Update `src/ml/dataset.py` to capture multiple cycle boundary snapshots per scenario
+  - Implement stratified train/val/test splitting to guarantee balanced class distributions
+  - Generate augmented, high-density training dataset
+
+- [ ] **Task J4: Strong Regularization & Model Comparison (RF vs HistGradientBoosting)**
+  - Implement regularized training with `max_depth=5`, `min_samples_leaf=6`, `min_samples_split=10`, `n_estimators=400`
+  - Add 5-fold Stratified Cross-Validation
+  - Support and evaluate HistGradientBoosting alongside Random Forest and select the best performer
+
+- [ ] **Task J5: Controller Slew-Rate Realism & Feature Smoothing**
+  - Relax slew limiter in `predict.py` when demand asymmetry is clearly extreme ($<0.30$ or $>0.70$)
+  - Implement rolling window feature smoothing before cycle boundary decisions
+  - Verify closed-loop stability with unit tests
+
+- [ ] **Task J6: Full Benchmark Evaluation, Test Suite Verification & Documentation Sync**
+  - Run full benchmark evaluation across all test scenarios with extended duration
+  - Verify all unit tests pass with zero regressions
+  - Sync `PRESENTATION.md`, `README.md`, and `TASKS.md` with final verified performance
+
+---
+
 ## ✅ Completed Tasks
 
 - [x] Create and establish `RULES.md` development standards
@@ -191,6 +227,8 @@
 - [x] Component F4: Dashboard Polish & Full Verification (Issue 08)
 - [x] Component G: Advanced Kinematics, Timing Optimization & Pipeline Remediation (Issues 09–13)
 - [x] Component H: Project Presentation & Final Delivery (`PRESENTATION.md`, `README.md`)
+- [x] Component I: Optimization & Efficiency Improvements (commits `b3de483` - `a0c2b7d`)
+
 
 
 

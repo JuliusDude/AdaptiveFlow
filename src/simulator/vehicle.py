@@ -89,11 +89,11 @@ class Vehicle:
         avg_speed = (self.speed + new_speed) / 2.0
         new_position = self.position + avg_speed * dt
 
-        # Enforce barrier boundary (accounting for moving barrier over dt) and clamp position >= 0.0
-        barrier_boundary = target_stop_pos + barrier_speed * dt
+        # Enforce barrier boundary at t+dt (lead vehicle has already moved to its t+dt position)
+        barrier_boundary = target_stop_pos
         if new_position > barrier_boundary:
             new_position = max(0.0, barrier_boundary)
-            new_speed = barrier_speed
+            new_speed = min(new_speed, barrier_speed)
         else:
             new_position = max(0.0, new_position)
 

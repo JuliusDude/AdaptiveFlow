@@ -97,6 +97,14 @@ class TrafficSignal:
             return self.current_phase == SignalPhase.PHASE_B_GREEN
         return False
 
+    def is_yellow(self, approach: str) -> bool:
+        """Check if an approach currently displays a clearance yellow phase."""
+        if approach in ("N", "S"):
+            return self.current_phase == SignalPhase.PHASE_A_YELLOW
+        elif approach in ("E", "W"):
+            return self.current_phase == SignalPhase.PHASE_B_YELLOW
+        return False
+
     def get_signal_color(self, approach: str) -> str:
         """Return visual signal color ('GREEN', 'YELLOW', 'RED') for an approach.
 
