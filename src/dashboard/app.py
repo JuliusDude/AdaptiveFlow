@@ -122,27 +122,28 @@ def main() -> None:
         "Traffic Demand Preset",
         options=list(SCENARIO_PRESETS.keys()) + ["custom"],
         index=0,
+        key="traffic_preset_select",
     )
 
     custom_rates = None
     if preset == "custom":
         st.sidebar.subheader("Approach Arrival Rates (veh/min)")
-        r_n = st.sidebar.slider("North Rate", 5.0, 50.0, 25.0, 1.0)
-        r_s = st.sidebar.slider("South Rate", 5.0, 50.0, 15.0, 1.0)
-        r_e = st.sidebar.slider("East Rate", 5.0, 50.0, 10.0, 1.0)
-        r_w = st.sidebar.slider("West Rate", 5.0, 50.0, 10.0, 1.0)
+        r_n = st.sidebar.slider("North Rate", 5.0, 50.0, 25.0, 1.0, key="slider_north_rate")
+        r_s = st.sidebar.slider("South Rate", 5.0, 50.0, 15.0, 1.0, key="slider_south_rate")
+        r_e = st.sidebar.slider("East Rate", 5.0, 50.0, 10.0, 1.0, key="slider_east_rate")
+        r_w = st.sidebar.slider("West Rate", 5.0, 50.0, 10.0, 1.0, key="slider_west_rate")
         custom_rates = {"N": r_n, "S": r_s, "E": r_e, "W": r_w}
 
     # Auto-detect preset changes and reset simulation
     if st.session_state.get("current_preset") != preset:
         reset_simulation(preset, custom_rates)
 
-    if st.sidebar.button("🔄 Reset Simulation", use_container_width=True):
+    if st.sidebar.button("🔄 Reset Simulation", use_container_width=True, key="btn_reset_sim"):
         reset_simulation(preset, custom_rates)
         st.rerun()
 
-    sim_duration = st.sidebar.radio("Simulate Forward By:", [1, 10, 35, 70, 140], index=3, horizontal=True)
-    if st.sidebar.button(f"▶️ Advance {sim_duration}s", type="primary", use_container_width=True):
+    sim_duration = st.sidebar.radio("Simulate Forward By:", [1, 10, 35, 70, 140], index=3, horizontal=True, key="sim_duration_radio")
+    if st.sidebar.button(f"▶️ Advance {sim_duration}s", type="primary", use_container_width=True, key="btn_advance_sim"):
         step_both_simulations(sim_duration)
         st.rerun()
 
