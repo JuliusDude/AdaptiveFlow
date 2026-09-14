@@ -195,12 +195,12 @@
   - Implement stratified train/val/test splitting to guarantee balanced class distributions
   - Generate augmented, high-density training dataset (1,500 samples: 1050 train / 225 val / 225 test)
 
-- [ ] **Task J4: Strong Regularization & Model Comparison (RF vs HistGradientBoosting)**
+- [x] **Task J4: Strong Regularization & Model Comparison (RF vs HistGradientBoosting)**
   - Implement regularized training with `max_depth=5`, `min_samples_leaf=6`, `min_samples_split=10`, `n_estimators=400`
   - Add 5-fold Stratified Cross-Validation
   - Support and evaluate HistGradientBoosting alongside Random Forest and select the best performer
 
-- [ ] **Task J5: Controller Slew-Rate Realism & Feature Smoothing**
+- [x] **Task J5: Controller Slew-Rate Realism & Feature Smoothing**
   - Relax slew limiter in `predict.py` when demand asymmetry is clearly extreme ($<0.30$ or $>0.70$)
   - Implement rolling window feature smoothing before cycle boundary decisions
   - Verify closed-loop stability with unit tests

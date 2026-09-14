@@ -87,15 +87,19 @@ class AdaptiveMLController:
         self,
         predictor: Optional[SignalTimingPredictor] = None,
         confidence_threshold: float = 0.22,
+        smoothing_window: int = 5,
     ) -> None:
         """Initialize controller.
 
         Args:
             predictor: SignalTimingPredictor instance (creates default if None).
             confidence_threshold: Minimum prediction confidence before switching away from balanced baseline.
+            smoothing_window: Number of recent 1s simulation steps to average features over before decision.
         """
         self.predictor = predictor if predictor is not None else SignalTimingPredictor()
         self.confidence_threshold = confidence_threshold
+        self.smoothing_window = max(1, smoothing_window)
+        self.feature_history: List[Dict[str, float]] = []
         self.decision_history: List[Dict[str, Any]] = []
 
     def update(self, sim: IntersectionSimulation, force_update: bool = False) -> Optional[str]:
@@ -108,6 +112,12 @@ class AdaptiveMLController:
         Returns:
             Recommended timing plan if an update occurred, else None.
         """
+        # Buffer live feature frame for smoothing
+        current_feat = extract_features(sim)
+        self.feature_history.append(current_feat)
+        if len(self.feature_history) > self.smoothing_window:
+            self.feature_history.pop(0)
+
         # Apply update at cycle boundary or when forced
         if force_update or sim.signal.just_completed_cycle or (sim.signal.cycle_count == 0 and sim.current_time == 0):
             # For empty simulation start (t=0 with no vehicles), default to balanced baseline P4
@@ -118,7 +128,18 @@ class AdaptiveMLController:
                 plan = "P4"
                 probs = {p: (1.0 if p == "P4" else 0.0) for p in TIMING_PLANS}
             else:
-                features = extract_features(sim)
+                # Average buffered continuous features over the smoothing window to eliminate momentary sensor noise
+                features = dict(self.feature_history[-1])
+                for k in [
+                    "N_count", "S_count", "E_count", "W_count",
+                    "N_queue", "S_queue", "E_queue", "W_queue",
+                    "N_speed", "S_speed", "E_speed", "W_speed",
+                    "N_wait", "S_wait", "E_wait", "W_wait",
+                    "total_vehicles", "total_queue", "mean_system_speed", "system_arrival_rate",
+                ]:
+                    if k in features:
+                        features[k] = float(np.mean([f[k] for f in self.feature_history]))
+
                 # Fast single-pass inference (predict plan and probabilities in one call)
                 plan, probs = self.predictor.predict_with_proba(features)
 
@@ -134,13 +155,21 @@ class AdaptiveMLController:
                 if (0.45 <= demand_ratio <= 0.55 and abs(ns_q - ew_q) <= 2) or (top_conf < self.confidence_threshold and abs(ns_vol - ew_vol) <= 4):
                     plan = "P4"
                 elif sim.current_time > 0 and sim.signal.current_plan_name:
-                    # Stability Guard 2: Hysteresis slew-rate limiter (prevent extreme 1-step jumps)
+                    # Stability Guard 2: Hysteresis slew-rate limiter
                     current_idx = int(sim.signal.current_plan_name[1:])
                     pred_idx = int(plan[1:])
                     delta = pred_idx - current_idx
-                    if abs(delta) > 2:
-                        step_dir = 2 if delta > 0 else -2
+                    # Relax slew limiter for extreme demand asymmetry (emergency surge)
+                    is_extreme_surge = (
+                        demand_ratio < 0.30 or demand_ratio > 0.70 or abs(ns_vol - ew_vol) >= 15
+                    )
+                    max_step = 4 if is_extreme_surge else 2
+                    if abs(delta) > max_step:
+                        step_dir = max_step if delta > 0 else -max_step
                         plan = f"P{current_idx + step_dir}"
+
+            # Reset smoothing buffer for next cycle
+            self.feature_history.clear()
 
             # Apply plan immediately so current cycle actuates the selected timings (no 70s actuation lag)
             sim.signal.apply_plan_now(plan)

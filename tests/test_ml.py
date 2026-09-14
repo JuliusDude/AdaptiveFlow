@@ -93,3 +93,47 @@ def test_immediate_plan_actuation_at_cycle_boundary():
     assert sim.signal.current_plan_name == selected
     assert sim.signal.next_plan_name == selected
 
+
+def test_cv_and_model_metrics_integrity():
+    import json
+    from src.features.feature_engineering import ALL_FEATURE_NAMES
+
+    metrics_file = Path("results/metrics/training_metrics.json")
+    assert metrics_file.exists()
+    with open(metrics_file, "r") as f:
+        metrics = json.load(f)
+
+    assert "model_type" in metrics
+    assert "rf_cv_macro_f1_mean" in metrics
+    assert "hgb_cv_macro_f1_mean" in metrics
+    assert len(metrics["feature_importances"]) == len(ALL_FEATURE_NAMES)
+    assert len(metrics["feature_importances"]) == 44
+
+
+def test_controller_feature_smoothing_and_surge_slew():
+    from src.simulator.traffic_generator import TrafficGenerator
+
+    # Extreme NS surge: N=35, S=35, E=0, W=0
+    gen = TrafficGenerator(rates={"N": 35.0, "S": 35.0, "E": 0.0, "W": 0.0}, seed=101)
+    sim = IntersectionSimulation(generator=gen, seed=101)
+    controller = AdaptiveMLController(smoothing_window=5)
+
+    # Initial cycle starts at P4
+    sim.signal.apply_plan_now("P4")
+
+    # Step for 70s
+    for _ in range(70):
+        sim.step(dt=1.0)
+        controller.update(sim)
+
+    # Smoothing buffer was populated during simulation and cleared at cycle boundary
+    assert len(controller.feature_history) == 0
+
+    # Under heavy NS surge, controller should slew beyond 2 steps (e.g., jump from P4 to P6/P7)
+    last_decision = controller.decision_history[-1]
+    chosen_plan = last_decision["selected_plan"]
+    chosen_idx = int(chosen_plan[1:])
+    # Should select heavy NS green (P6 or P7)
+    assert chosen_idx >= 6
+
+
