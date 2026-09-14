@@ -32,7 +32,7 @@ from src.dashboard.styles import COCKPIT_CSS
 
 st.set_page_config(
     page_title="AdaptiveFlow | Predictive Signal Control",
-    page_icon="🚦",
+    page_icon=None,
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -108,11 +108,16 @@ def main() -> None:
     # --- Sidebar Controls ---
     st.sidebar.markdown(
         """
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
-            <span style="font-size:24px;">🚦</span>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+            <div style="width:34px;height:34px;border-radius:8px;background:rgba(0,240,255,0.08);border:1px solid rgba(0,240,255,0.25);display:flex;align-items:center;justify-content:center;box-shadow:0 0 12px rgba(0,240,255,0.15);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#00f0ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="2" fill="#00f0ff"/>
+                    <path d="M12 2v4M12 18v4M2 12h4M18 12h4"/>
+                </svg>
+            </div>
             <div>
-                <div style="font-size:16px;font-weight:800;color:#f8fafc;letter-spacing:-0.02em;">AdaptiveFlow</div>
-                <div style="font-size:11px;color:#94a3b8;font-weight:600;">Tactical Traffic AI Cockpit</div>
+                <div style="font-size:15px;font-weight:800;color:#f8fafc;letter-spacing:0.04em;text-transform:uppercase;">AdaptiveFlow</div>
+                <div style="font-size:10px;color:#94a3b8;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;font-family:monospace;">Tactical Traffic AI</div>
             </div>
         </div>
         """,
@@ -143,16 +148,23 @@ def main() -> None:
 
     c_btn1, c_btn2 = st.sidebar.columns(2)
     with c_btn1:
-        if st.button("🔄 Reset Sim", use_container_width=True, key="btn_reset_sim"):
+        if st.button("Reset Sim", use_container_width=True, key="btn_reset_sim"):
             reset_simulation(preset, custom_rates)
             st.rerun()
     with c_btn2:
-        if st.button("➕ Extend +70s", use_container_width=True, key="btn_extend_sim"):
+        if st.button("Extend +70s", use_container_width=True, key="btn_extend_sim"):
             buffer.buffer_horizon(len(buffer.frames) + 70)
             st.rerun()
 
     st.sidebar.divider()
-    st.sidebar.markdown("### ⚙️ Timing Configurations")
+    st.sidebar.markdown(
+        """
+        <div style="font-size:11px;font-weight:700;color:#64748b;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:8px;font-family:monospace;">
+            Timing Specifications
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
     st.sidebar.markdown("**Fixed Baseline:** `P4` (30s NS / 30s EW)")
     active_ml_plan = sim_ml.signal.current_plan_name
     active_plan_info = TIMING_PLANS[active_ml_plan]
@@ -162,13 +174,24 @@ def main() -> None:
 
     st.sidebar.markdown(
         """
-        <div style="margin-top:20px;padding:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;">
-            <div style="font-size:11px;font-weight:700;color:#38bdf8;text-transform:uppercase;letter-spacing:0.08em;">Keyboard Shortcuts</div>
-            <div style="font-size:11px;color:#94a3b8;margin-top:4px;line-height:1.6;">
-                • <b>Space</b>: Play / Pause<br>
-                • <b>←</b>: Step Back 1s<br>
-                • <b>→</b>: Step Forward 1s<br>
-                • <b>Scrubber</b>: Seek past seconds
+        <div style="margin-top:20px;padding:12px;background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.06);border-radius:12px;">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+                <span class="led-pip cyan"></span>
+                <span style="font-size:10px;font-weight:700;color:#38bdf8;text-transform:uppercase;letter-spacing:0.12em;font-family:monospace;">Kinematic Shortcuts</span>
+            </div>
+            <div style="font-size:11px;color:#94a3b8;line-height:1.7;">
+                <div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid rgba(255,255,255,0.04);">
+                    <span>Play / Pause</span><span style="font-family:monospace;color:#f8fafc;font-weight:700;">Space</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid rgba(255,255,255,0.04);">
+                    <span>Step Backward</span><span style="font-family:monospace;color:#f8fafc;font-weight:700;">Left Arrow</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px solid rgba(255,255,255,0.04);">
+                    <span>Step Forward</span><span style="font-family:monospace;color:#f8fafc;font-weight:700;">Right Arrow</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:2px 0;">
+                    <span>Timeline Scrub</span><span style="font-family:monospace;color:#f8fafc;font-weight:700;">Drag Slider</span>
+                </div>
             </div>
         </div>
         """,
@@ -299,12 +322,32 @@ def main() -> None:
         hist_df = pd.DataFrame(chart_records)
         ch_col1, ch_col2 = st.columns(2)
         with ch_col1:
-            st.markdown("##### ⏱️ Comprehensive Vehicle Delay Over Time (s)")
+            st.markdown(
+                """
+                <div style="display:flex;align-items:center;gap:7px;margin-bottom:8px;">
+                    <span class="led-pip amber"></span>
+                    <span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#cbd5e1;font-family:monospace;">
+                        Comprehensive Vehicle Delay Over Time (s)
+                    </span>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
             delay_chart_df = hist_df.set_index("time")[["Fixed Delay", "ML Adaptive Delay"]]
             st.line_chart(delay_chart_df, color=["#dc3545", "#28a745"])
             st.caption("Comprehensive delay accounts for completed trips plus active queued and crawling vehicles.")
         with ch_col2:
-            st.markdown("##### 🚗 Average Queue Length Over Time")
+            st.markdown(
+                """
+                <div style="display:flex;align-items:center;gap:7px;margin-bottom:8px;">
+                    <span class="led-pip cyan"></span>
+                    <span style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#cbd5e1;font-family:monospace;">
+                        Average Queue Length Over Time
+                    </span>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
             queue_chart_df = hist_df.set_index("time")[["Fixed Queue", "ML Adaptive Queue"]]
             st.line_chart(queue_chart_df, color=["#dc3545", "#28a745"])
             st.caption("Aggregate stopped and buffered queue count across all approaches.")
@@ -315,7 +358,15 @@ def main() -> None:
     col_decisions, col_model = st.columns([3, 2])
 
     with col_decisions:
-        st.subheader("🧠 Recent ML Controller Decisions")
+        st.markdown(
+            """
+            <div style="margin-bottom:10px;">
+                <div class="eyebrow-pill eyebrow-cyan">Decision Stream</div>
+                <h3 style="font-size:18px;font-weight:700;margin:2px 0 6px 0;">Recent ML Controller Decisions</h3>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
         if ml_controller.decision_history:
             recent_decisions = list(reversed(ml_controller.decision_history[-8:]))
             dec_table = []
@@ -329,10 +380,18 @@ def main() -> None:
                 })
             st.dataframe(pd.DataFrame(dec_table), use_container_width=True, hide_index=True)
         else:
-            st.info("No cycle transitions logged yet. Advance the simulation to see ML decisions.")
+            st.info("No cycle transitions logged yet. Advance the simulation to observe controller policy.")
 
     with col_model:
-        st.subheader("📊 Top Feature Importances (Random Forest)")
+        st.markdown(
+            """
+            <div style="margin-bottom:10px;">
+                <div class="eyebrow-pill eyebrow-emerald">Feature Attribution</div>
+                <h3 style="font-size:18px;font-weight:700;margin:2px 0 6px 0;">Top Feature Importances (Random Forest)</h3>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
         train_metrics = load_training_metrics()
         if "feature_importances" in train_metrics:
             top_feats = list(train_metrics["feature_importances"].items())[:6]
@@ -345,7 +404,15 @@ def main() -> None:
             st.caption("Training metrics not found. Run model training to view feature importances.")
 
     # 22-Feature Live Vector
-    st.subheader("📍 22-Feature Live Telemetry Vector")
+    st.markdown(
+        """
+        <div style="margin-top:20px;margin-bottom:10px;">
+            <div class="eyebrow-pill eyebrow-purple">State Vector</div>
+            <h3 style="font-size:18px;font-weight:700;margin:2px 0 6px 0;">22-Feature Live Telemetry Vector</h3>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
     features = extract_features(sim_ml)
     feat_df = pd.DataFrame([
         {"Category": "Demand (Vehicles)", "N": features["N_count"], "S": features["S_count"], "E": features["E_count"], "W": features["W_count"]},

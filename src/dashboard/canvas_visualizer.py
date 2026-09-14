@@ -1,12 +1,11 @@
 """Hardware-accelerated 60 FPS HTML5 Canvas / SVG 4-Way Intersection Visualizer.
 
-Implements a photorealistic top-down intersection inspired by realistic intersection geometries:
-- Zero car overlap with dynamic bumper-to-bumper queue stacking.
-- Complete intersection traversal and continuous off-screen departure.
-- Authentic right-hand lane physics for North, South, East, and West approaches.
-- Prominent 3-lamp physical signal lanterns with intense LED bloom and dual countdown timers.
-- Autoplay on load with full Play, Pause, Rewind 5s, Step Back, Step Forward, Fast-Forward,
-  Speed selection, Scrubber, and instant "Force Phase Switch" testing.
+Impeccable zero-emoji design system:
+- High-precision vector road geometry with crisp SVG lane markings and curb radii.
+- Inline SVG playback controls (no emoji characters).
+- Machined 3-aspect LED traffic lanterns with fresnel bloom and numerical timer pills.
+- Zero-overlap vehicle queues with physically accurate Euler kinematics.
+- Full intersection crossing and smooth off-screen departure.
 """
 
 def generate_intersection_html(playback_json: str) -> str:
@@ -26,13 +25,13 @@ def generate_intersection_html(playback_json: str) -> str:
 <title>AdaptiveFlow Intersection Visualizer</title>
 <style>
   :root {{
-    --bg: #07090d;
-    --grass: #162016;
-    --curb: #242b35;
-    --road: #1c2128;
-    --road-inner: #242a33;
-    --lane: #f3e5ab;
-    --stop: #faf8f5;
+    --bg: #06080c;
+    --grass: #121813;
+    --curb: #222730;
+    --road: #191d24;
+    --road-inner: #21262f;
+    --lane: #eedfa8;
+    --stop: #f8f6f0;
     --cyan: #00f0ff;
     --emerald: #10b981;
     --amber: #f59e0b;
@@ -59,9 +58,9 @@ def generate_intersection_html(playback_json: str) -> str:
   /* Top Control Strip */
   .top-bar {{
     height: 48px;
-    background: rgba(14, 18, 26, 0.95);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(12, 16, 23, 0.96);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -70,8 +69,8 @@ def generate_intersection_html(playback_json: str) -> str:
   }}
   .mode-pills {{
     display: flex;
-    gap: 6px;
-    background: rgba(0, 0, 0, 0.4);
+    gap: 4px;
+    background: rgba(0, 0, 0, 0.45);
     padding: 3px;
     border-radius: 20px;
     border: 1px solid rgba(255, 255, 255, 0.06);
@@ -83,39 +82,41 @@ def generate_intersection_html(playback_json: str) -> str:
     padding: 5px 14px;
     border-radius: 16px;
     font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.03em;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.32, 0.72, 0, 1);
   }}
   .mode-btn.active {{
     background: rgba(0, 240, 255, 0.15);
     color: var(--cyan);
-    box-shadow: 0 0 12px rgba(0, 240, 255, 0.2);
+    box-shadow: 0 0 12px rgba(0, 240, 255, 0.25);
   }}
   .telemetry-pills {{
     display: flex;
     align-items: center;
     gap: 12px;
-    font-size: 12px;
+    font-size: 11px;
   }}
   .badge {{
     padding: 3px 10px;
     border-radius: 12px;
     font-size: 11px;
     font-weight: 700;
-    font-family: monospace;
-    letter-spacing: 0.05em;
+    font-family: 'SF Mono', 'JetBrains Mono', monospace;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
   }}
   .badge-ml {{
-    background: rgba(16, 185, 129, 0.15);
+    background: rgba(16, 185, 129, 0.12);
     color: #34d399;
-    border: 1px solid rgba(16, 185, 129, 0.3);
+    border: 1px solid rgba(16, 185, 129, 0.28);
   }}
   .badge-fixed {{
-    background: rgba(239, 68, 68, 0.15);
+    background: rgba(239, 68, 68, 0.12);
     color: #f87171;
-    border: 1px solid rgba(239, 68, 68, 0.3);
+    border: 1px solid rgba(239, 68, 68, 0.28);
   }}
 
   /* Viewport Stage */
@@ -139,7 +140,7 @@ def generate_intersection_html(playback_json: str) -> str:
   .arena.hidden {{ display: none; }}
   .arena-divider {{
     width: 2px;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.08);
     height: 100%;
     position: relative;
     z-index: 80;
@@ -153,20 +154,20 @@ def generate_intersection_html(playback_json: str) -> str:
     min-width: 500px;
     min-height: 480px;
     background:
-      radial-gradient(circle at 50% 50%, rgba(30, 42, 30, 0.5), transparent 75%),
+      radial-gradient(circle at 50% 50%, rgba(26, 36, 26, 0.45), transparent 75%),
       var(--grass);
     overflow: hidden;
   }}
   .intersection-scene::before {{
     content: "";
     position: absolute; inset: 0;
-    opacity: 0.2;
+    opacity: 0.18;
     background-image:
-      radial-gradient(circle at 15% 25%, #4a683e 0 1px, transparent 1.5px),
-      radial-gradient(circle at 75% 15%, #405c36 0 1px, transparent 1.5px),
-      radial-gradient(circle at 35% 85%, #45623b 0 1px, transparent 1.5px),
-      radial-gradient(circle at 85% 65%, #527546 0 1px, transparent 1.5px);
-    background-size: 50px 50px;
+      radial-gradient(circle at 15% 25%, #3d5633 0 1px, transparent 1.5px),
+      radial-gradient(circle at 75% 15%, #344c2c 0 1px, transparent 1.5px),
+      radial-gradient(circle at 35% 85%, #3a5231 0 1px, transparent 1.5px),
+      radial-gradient(circle at 85% 65%, #46653c 0 1px, transparent 1.5px);
+    background-size: 48px 48px;
   }}
 
   /* Curbs and Sidewalks */
@@ -175,7 +176,7 @@ def generate_intersection_html(playback_json: str) -> str:
     width: calc(50% - 100px);
     height: calc(50% - 100px);
     background: var(--curb);
-    border: 2px solid #363e4c;
+    border: 2px solid #333a44;
     z-index: 2;
   }}
   .curb-nw {{ top: 0; left: 0; border-bottom-right-radius: 28px; }}
@@ -207,7 +208,7 @@ def generate_intersection_html(playback_json: str) -> str:
     position: absolute; left: 50%; top: 50%;
     width: 200px; height: 200px;
     transform: translate(-50%, -50%);
-    background: #232932;
+    background: #20262f;
     box-shadow: inset 0 0 25px rgba(0,0,0,0.6);
     z-index: 1;
   }}
@@ -216,8 +217,8 @@ def generate_intersection_html(playback_json: str) -> str:
     width: 80px; height: 80px;
     transform: translate(-50%, -50%);
     border-radius: 12px;
-    background: #2b323d;
-    box-shadow: 0 0 0 2px rgba(255,255,255,0.04), inset 0 0 15px rgba(0,0,0,0.35);
+    background: #282f3a;
+    box-shadow: 0 0 0 2px rgba(255,255,255,0.03), inset 0 0 14px rgba(0,0,0,0.4);
     z-index: 2;
   }}
 
@@ -240,13 +241,9 @@ def generate_intersection_html(playback_json: str) -> str:
     box-shadow: 0 1px 4px rgba(0,0,0,0.6);
     z-index: 4;
   }}
-  /* North: on driver's right (West side: x from cx-100 to cx) at y = cy - 100 */
   .stopbar.n {{ left: calc(50% - 100px); top: calc(50% - 104px); width: 100px; height: 5px; }}
-  /* South: on driver's right (East side: x from cx to cx+100) at y = cy + 100 */
   .stopbar.s {{ left: 50%; top: calc(50% + 100px); width: 100px; height: 5px; }}
-  /* West: on driver's right (South side: y from cy to cy+100) at x = cx - 100 */
   .stopbar.w {{ left: calc(50% - 104px); top: 50%; width: 5px; height: 100px; }}
-  /* East: on driver's right (North side: y from cy-100 to cy) at x = cx + 100 */
   .stopbar.e {{ left: calc(50% + 100px); top: calc(50% - 100px); width: 5px; height: 100px; }}
 
   /* Zebra Crosswalks */
@@ -258,7 +255,7 @@ def generate_intersection_html(playback_json: str) -> str:
   }}
   .cross span {{
     background: #f1eddb;
-    opacity: 0.8;
+    opacity: 0.75;
     box-shadow: 0 0 1px rgba(0,0,0,0.4);
   }}
   .cross.n {{ left: calc(50% - 100px); top: calc(50% - 138px); width: 100px; height: 26px; }}
@@ -270,21 +267,19 @@ def generate_intersection_html(playback_json: str) -> str:
   .cross.e {{ left: calc(50% + 112px); top: calc(50% - 100px); width: 26px; height: 100px; flex-direction: column; }}
   .cross.e span {{ width: 26px; height: 6px; }}
 
-  /* Directional Lane Arrows */
-  .arrow {{
+  /* Directional Lane Arrows (Crisp SVG) */
+  .arrow-svg {{
     position: absolute;
-    color: rgba(255, 255, 255, 0.4);
-    font-size: 16px;
-    font-weight: 800;
     z-index: 3;
     pointer-events: none;
+    opacity: 0.38;
   }}
-  .arrow.n {{ left: calc(50% - 54px); top: calc(50% - 170px); transform: rotate(180deg); }}
-  .arrow.s {{ left: calc(50% + 40px); top: calc(50% + 150px); }}
-  .arrow.w {{ left: calc(50% - 170px); top: calc(50% + 40px); transform: rotate(90deg); }}
-  .arrow.e {{ left: calc(50% + 150px); top: calc(50% - 54px); transform: rotate(-90deg); }}
+  .arrow-svg.n {{ left: calc(50% - 52px); top: calc(50% - 175px); transform: rotate(180deg); }}
+  .arrow-svg.s {{ left: calc(50% + 36px); top: calc(50% + 152px); }}
+  .arrow-svg.w {{ left: calc(50% - 175px); top: calc(50% + 36px); transform: rotate(90deg); }}
+  .arrow-svg.e {{ left: calc(50% + 152px); top: calc(50% - 52px); transform: rotate(-90deg); }}
 
-  /* Prominent 3-Lamp Traffic Signal Heads */
+  /* Machined 3-Lamp Traffic Signal Heads */
   .signal {{
     position: absolute;
     width: 26px;
@@ -292,7 +287,7 @@ def generate_intersection_html(playback_json: str) -> str:
     border-radius: 7px;
     background: linear-gradient(#14181c, #090b0d);
     border: 2px solid #454d57;
-    box-shadow: 0 5px 12px rgba(0,0,0,0.75), inset 0 0 8px rgba(255,255,255,0.06);
+    box-shadow: 0 5px 14px rgba(0,0,0,0.75), inset 0 0 8px rgba(255,255,255,0.06);
     z-index: 40;
     display: flex;
     flex-direction: column;
@@ -327,23 +322,35 @@ def generate_intersection_html(playback_json: str) -> str:
   .signal.w {{ top: calc(50% + 112px); left: calc(50% - 150px); transform: rotate(90deg); }}
   .signal.e {{ top: calc(50% - 138px); left: calc(50% + 80px); transform: rotate(-90deg); }}
 
-  /* Integrated Signal Countdown Badges */
+  /* Precision Countdown Badges (No Emojis) */
   .sig-timer {{
     position: absolute;
-    background: rgba(11, 15, 22, 0.9);
+    background: rgba(11, 15, 22, 0.92);
     backdrop-filter: blur(8px);
     border: 1px solid rgba(255,255,255,0.15);
     padding: 2px 8px;
-    border-radius: 8px;
+    border-radius: 6px;
     font-size: 11px;
-    font-family: 'SF Mono', monospace;
-    font-weight: 800;
+    font-family: 'SF Mono', 'JetBrains Mono', monospace;
+    font-weight: 700;
     color: #fff;
     z-index: 45;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
     pointer-events: none;
     white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
   }}
+  .timer-pip {{
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    display: inline-block;
+  }}
+  .timer-pip.green {{ background: #34c759; box-shadow: 0 0 6px #34c759; }}
+  .timer-pip.yellow {{ background: #ffcc00; box-shadow: 0 0 6px #ffcc00; }}
+  .timer-pip.red {{ background: #ff3b30; box-shadow: 0 0 6px #ff3b30; }}
+
   .sig-timer.n {{ top: calc(50% - 180px); left: calc(50% - 146px); }}
   .sig-timer.s {{ top: calc(50% + 160px); left: calc(50% + 104px); }}
   .sig-timer.w {{ top: calc(50% + 155px); left: calc(50% - 180px); }}
@@ -364,7 +371,6 @@ def generate_intersection_html(playback_json: str) -> str:
     box-shadow: 0 4px 8px rgba(0,0,0,0.6);
     transition: transform 0.05s linear;
   }}
-  /* Cabin glass */
   .car::before {{
     content: "";
     position: absolute; left: 7px; right: 7px; top: 3px; height: 14px;
@@ -372,14 +378,13 @@ def generate_intersection_html(playback_json: str) -> str:
     background: linear-gradient(90deg, rgba(255,255,255,0.35), rgba(255,255,255,0.08));
     border: 1px solid rgba(255,255,255,0.2);
   }}
-  /* Roof panel */
   .car::after {{
     content: "";
     position: absolute; left: 12px; right: 12px; top: 4px; height: 6px;
     border-radius: 2px;
     background: rgba(0, 0, 0, 0.45);
   }}
-  /* Brake Lights (Rear: Left edge) */
+  /* Brake Lights */
   .car .brake-light {{
     position: absolute;
     left: 1px;
@@ -395,7 +400,7 @@ def generate_intersection_html(playback_json: str) -> str:
     background: #ff2200;
     box-shadow: -3px 0 8px #ff2200, -1px 0 3px #fff;
   }}
-  /* Headlights (Front: Right edge) */
+  /* Headlights */
   .car .headlight {{
     position: absolute;
     right: 1px;
@@ -408,7 +413,7 @@ def generate_intersection_html(playback_json: str) -> str:
   .car .hl-top {{ top: 2px; }}
   .car .hl-bot {{ bottom: 2px; }}
 
-  /* Vibrant Vehicle Palettes */
+  /* Vehicle Palettes */
   .car.c-blue {{ background: linear-gradient(90deg, #1e40af, #3b82f6); }}
   .car.c-cyan {{ background: linear-gradient(90deg, #0891b2, #06b6d4); }}
   .car.c-emerald {{ background: linear-gradient(90deg, #047857, #10b981); }}
@@ -417,99 +422,106 @@ def generate_intersection_html(playback_json: str) -> str:
   .car.c-silver {{ background: linear-gradient(90deg, #475569, #94a3b8); }}
   .car.c-white {{ background: linear-gradient(90deg, #cbd5e1, #f8fafc); }}
 
-  /* Floating HUD Overlay */
+  /* Floating HUD Overlay (Zero-Emoji) */
   .hud-card {{
     position: absolute;
     top: 14px;
     left: 14px;
-    background: rgba(11, 15, 22, 0.88);
+    background: rgba(10, 14, 20, 0.9);
     backdrop-filter: blur(14px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.09);
     border-radius: 12px;
     padding: 10px 14px;
     z-index: 60;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-    min-width: 200px;
+    min-width: 210px;
   }}
   .hud-title {{
-    font-size: 11px;
+    font-size: 10px;
     text-transform: uppercase;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.16em;
     font-weight: 700;
-    color: #94a3b8;
+    font-family: 'SF Mono', monospace;
+    color: #64748b;
   }}
   .hud-plan {{
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 800;
-    color: #fff;
-    margin: 2px 0 6px 0;
+    color: #f8fafc;
+    margin: 3px 0 6px 0;
+    letter-spacing: -0.01em;
   }}
   .hud-row {{
     display: flex;
     align-items: center;
     justify-content: space-between;
     font-size: 11px;
-    color: #cbd5e1;
+    color: #94a3b8;
     margin-top: 3px;
   }}
+  .hud-row strong {{
+    font-family: 'SF Mono', monospace;
+    color: #f1f5f9;
+  }}
   .hud-btn {{
-    margin-top: 8px;
+    margin-top: 10px;
     width: 100%;
-    background: rgba(0, 240, 255, 0.12);
-    border: 1px solid rgba(0, 240, 255, 0.3);
+    background: rgba(0, 240, 255, 0.1);
+    border: 1px solid rgba(0, 240, 255, 0.25);
     color: var(--cyan);
     border-radius: 8px;
-    padding: 5px 8px;
-    font-size: 11px;
+    padding: 6px 10px;
+    font-size: 10px;
     font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
     cursor: pointer;
     transition: all 0.15s ease;
   }}
   .hud-btn:hover {{
-    background: rgba(0, 240, 255, 0.25);
-    box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+    background: rgba(0, 240, 255, 0.2);
+    box-shadow: 0 0 12px rgba(0, 240, 255, 0.25);
   }}
 
-  /* Bottom Floating Playback Dock */
+  /* Bottom Floating Playback Dock (Pure SVG) */
   .playback-dock {{
     position: absolute;
     bottom: 14px;
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(13, 17, 25, 0.94);
+    background: rgba(12, 16, 23, 0.95);
     backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 28px;
-    padding: 8px 18px;
+    padding: 7px 16px;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     z-index: 100;
-    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.65);
   }}
   .dock-btn {{
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    color: #e2e8f0;
-    width: 36px; height: 36px;
+    color: #cbd5e1;
+    width: 34px; height: 34px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    font-size: 13px;
     transition: all 0.15s cubic-bezier(0.32, 0.72, 0, 1);
   }}
   .dock-btn:hover {{
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.14);
     color: #fff;
-    transform: scale(1.08);
+    transform: scale(1.06);
   }}
   .dock-btn:active {{ transform: scale(0.92); }}
   .dock-btn.primary {{
     background: var(--cyan);
     color: #040914;
-    font-weight: 800;
+    border-color: rgba(56, 189, 248, 0.6);
     box-shadow: 0 0 14px rgba(0, 240, 255, 0.4);
   }}
   .dock-btn.primary:hover {{
@@ -526,23 +538,23 @@ def generate_intersection_html(playback_json: str) -> str:
     -webkit-appearance: none;
     appearance: none;
     width: 100%;
-    height: 5px;
-    border-radius: 3px;
-    background: rgba(255, 255, 255, 0.15);
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.14);
     outline: none;
     cursor: pointer;
   }}
   .scrubber::-webkit-slider-thumb {{
     -webkit-appearance: none;
     appearance: none;
-    width: 13px; height: 13px;
+    width: 12px; height: 12px;
     border-radius: 50%;
     background: var(--cyan);
     box-shadow: 0 0 8px var(--cyan);
     cursor: pointer;
   }}
   .time-badge {{
-    font-family: 'SF Mono', monospace;
+    font-family: 'SF Mono', 'JetBrains Mono', monospace;
     font-size: 11px;
     font-weight: 700;
     color: #94a3b8;
@@ -550,24 +562,24 @@ def generate_intersection_html(playback_json: str) -> str:
   }}
   .speed-pills {{
     display: flex;
-    gap: 4px;
-    background: rgba(0,0,0,0.3);
+    gap: 3px;
+    background: rgba(0,0,0,0.35);
     padding: 2px;
-    border-radius: 14px;
+    border-radius: 12px;
   }}
   .speed-btn {{
     background: transparent;
     border: none;
     color: #94a3b8;
-    padding: 3px 8px;
-    border-radius: 10px;
+    padding: 3px 7px;
+    border-radius: 9px;
     font-size: 10px;
     font-weight: 700;
-    font-family: monospace;
+    font-family: 'SF Mono', monospace;
     cursor: pointer;
   }}
   .speed-btn.active {{
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.14);
     color: #fff;
   }}
 </style>
@@ -577,12 +589,12 @@ def generate_intersection_html(playback_json: str) -> str:
   <!-- Top Bar -->
   <div class="top-bar">
     <div class="mode-pills">
-      <button class="mode-btn active" id="btnModeML" onclick="setViewMode('ml')">AdaptiveFlow ML</button>
+      <button class="mode-btn active" id="btnModeML" onclick="setViewMode('ml')">ML Adaptive</button>
       <button class="mode-btn" id="btnModeFixed" onclick="setViewMode('fixed')">Fixed Baseline</button>
-      <button class="mode-btn" id="btnModeDual" onclick="setViewMode('dual')">Side-by-Side Dual Arena</button>
+      <button class="mode-btn" id="btnModeDual" onclick="setViewMode('dual')">Dual Arena</button>
     </div>
     <div class="telemetry-pills">
-      <span class="badge badge-ml" id="topMLBadge">ML Plan: P4</span>
+      <span class="badge badge-ml" id="topMLBadge">ML: P4</span>
       <span class="badge badge-fixed" id="topFixedBadge" style="display:none;">Fixed: P4</span>
       <span class="time-badge" id="topClock">T = 0.0s</span>
     </div>
@@ -590,7 +602,7 @@ def generate_intersection_html(playback_json: str) -> str:
 
   <!-- Stage Area (Supports Single or Dual Arenas) -->
   <div class="stage">
-    <!-- Left / Primary Arena (AdaptiveFlow ML) -->
+    <!-- Primary Arena (AdaptiveFlow ML) -->
     <div class="arena" id="arenaML">
       <div class="intersection-scene" id="sceneML">
         <!-- Curbs -->
@@ -623,11 +635,11 @@ def generate_intersection_html(playback_json: str) -> str:
         <div class="cross w" id="crossML_W"></div>
         <div class="cross e" id="crossML_E"></div>
 
-        <!-- Approach Direction Arrows -->
-        <div class="arrow n">▲</div>
-        <div class="arrow s">▲</div>
-        <div class="arrow w">▲</div>
-        <div class="arrow e">▲</div>
+        <!-- Crisp Directional Road Arrows (SVG) -->
+        <svg class="arrow-svg n" width="16" height="24" viewBox="0 0 16 24"><path d="M8 2 L2 10 L6 10 L6 22 L10 22 L10 10 L14 10 Z" fill="white"/></svg>
+        <svg class="arrow-svg s" width="16" height="24" viewBox="0 0 16 24"><path d="M8 2 L2 10 L6 10 L6 22 L10 22 L10 10 L14 10 Z" fill="white"/></svg>
+        <svg class="arrow-svg w" width="16" height="24" viewBox="0 0 16 24"><path d="M8 2 L2 10 L6 10 L6 22 L10 22 L10 10 L14 10 Z" fill="white"/></svg>
+        <svg class="arrow-svg e" width="16" height="24" viewBox="0 0 16 24"><path d="M8 2 L2 10 L6 10 L6 22 L10 22 L10 10 L14 10 Z" fill="white"/></svg>
 
         <!-- Traffic Signals -->
         <div class="signal n" id="sigML_N"><div class="lamp red"></div><div class="lamp yellow"></div><div class="lamp green"></div></div>
@@ -636,39 +648,39 @@ def generate_intersection_html(playback_json: str) -> str:
         <div class="signal e" id="sigML_E"><div class="lamp red"></div><div class="lamp yellow"></div><div class="lamp green"></div></div>
 
         <!-- Countdown Badges -->
-        <div class="sig-timer n" id="timerML_N">--</div>
-        <div class="sig-timer s" id="timerML_S">--</div>
-        <div class="sig-timer w" id="timerML_W">--</div>
-        <div class="sig-timer e" id="timerML_E">--</div>
+        <div class="sig-timer n" id="timerML_N"><span class="timer-pip"></span><span class="timer-text">--</span></div>
+        <div class="sig-timer s" id="timerML_S"><span class="timer-pip"></span><span class="timer-text">--</span></div>
+        <div class="sig-timer w" id="timerML_W"><span class="timer-pip"></span><span class="timer-text">--</span></div>
+        <div class="sig-timer e" id="timerML_E"><span class="timer-pip"></span><span class="timer-text">--</span></div>
 
         <!-- Vehicles Layer -->
         <div class="car-layer" id="carsML"></div>
 
         <!-- HUD Card -->
         <div class="hud-card">
-          <div class="hud-title">AdaptiveFlow Controller</div>
+          <div class="hud-title">Controller Active</div>
           <div class="hud-plan" id="hudML_Plan">Plan P4</div>
           <div class="hud-row">
-            <span>Phase:</span>
+            <span>Phase</span>
             <strong id="hudML_Phase">NS GREEN</strong>
           </div>
           <div class="hud-row">
-            <span>N/S Signal:</span>
-            <strong id="hudML_NSTimer" style="color:#34d399;">🟢 18.0s</strong>
+            <span>N/S Signal</span>
+            <strong id="hudML_NSTimer">18.0s</strong>
           </div>
           <div class="hud-row">
-            <span>E/W Signal:</span>
-            <strong id="hudML_EWTimer" style="color:#ef4444;">🔴 23.0s</strong>
+            <span>E/W Signal</span>
+            <strong id="hudML_EWTimer">23.0s</strong>
           </div>
           <div class="hud-row">
-            <span>Avg Delay:</span>
+            <span>Avg Delay</span>
             <strong id="hudML_Delay" style="color: #34d399;">0.0s</strong>
           </div>
           <div class="hud-row">
-            <span>Queue:</span>
+            <span>Queue</span>
             <strong id="hudML_Queue">0 veh</strong>
           </div>
-          <button class="hud-btn" onclick="jumpToNextPhase()">⚡ Switch Phase Now</button>
+          <button class="hud-btn" onclick="jumpToNextPhase()">Override Phase Switch</button>
         </div>
       </div>
     </div>
@@ -709,11 +721,11 @@ def generate_intersection_html(playback_json: str) -> str:
         <div class="cross w" id="crossFixed_W"></div>
         <div class="cross e" id="crossFixed_E"></div>
 
-        <!-- Approach Direction Arrows -->
-        <div class="arrow n">▲</div>
-        <div class="arrow s">▲</div>
-        <div class="arrow w">▲</div>
-        <div class="arrow e">▲</div>
+        <!-- Crisp Directional Road Arrows (SVG) -->
+        <svg class="arrow-svg n" width="16" height="24" viewBox="0 0 16 24"><path d="M8 2 L2 10 L6 10 L6 22 L10 22 L10 10 L14 10 Z" fill="white"/></svg>
+        <svg class="arrow-svg s" width="16" height="24" viewBox="0 0 16 24"><path d="M8 2 L2 10 L6 10 L6 22 L10 22 L10 10 L14 10 Z" fill="white"/></svg>
+        <svg class="arrow-svg w" width="16" height="24" viewBox="0 0 16 24"><path d="M8 2 L2 10 L6 10 L6 22 L10 22 L10 10 L14 10 Z" fill="white"/></svg>
+        <svg class="arrow-svg e" width="16" height="24" viewBox="0 0 16 24"><path d="M8 2 L2 10 L6 10 L6 22 L10 22 L10 10 L14 10 Z" fill="white"/></svg>
 
         <!-- Traffic Signals -->
         <div class="signal n" id="sigFixed_N"><div class="lamp red"></div><div class="lamp yellow"></div><div class="lamp green"></div></div>
@@ -722,36 +734,36 @@ def generate_intersection_html(playback_json: str) -> str:
         <div class="signal e" id="sigFixed_E"><div class="lamp red"></div><div class="lamp yellow"></div><div class="lamp green"></div></div>
 
         <!-- Countdown Badges -->
-        <div class="sig-timer n" id="timerFixed_N">--</div>
-        <div class="sig-timer s" id="timerFixed_S">--</div>
-        <div class="sig-timer w" id="timerFixed_W">--</div>
-        <div class="sig-timer e" id="timerFixed_E">--</div>
+        <div class="sig-timer n" id="timerFixed_N"><span class="timer-pip"></span><span class="timer-text">--</span></div>
+        <div class="sig-timer s" id="timerFixed_S"><span class="timer-pip"></span><span class="timer-text">--</span></div>
+        <div class="sig-timer w" id="timerFixed_W"><span class="timer-pip"></span><span class="timer-text">--</span></div>
+        <div class="sig-timer e" id="timerFixed_E"><span class="timer-pip"></span><span class="timer-text">--</span></div>
 
         <!-- Vehicles Layer -->
         <div class="car-layer" id="carsFixed"></div>
 
         <!-- HUD Card -->
         <div class="hud-card">
-          <div class="hud-title">Fixed-Time Baseline</div>
+          <div class="hud-title">Fixed Baseline</div>
           <div class="hud-plan" style="color: #f87171;">Plan P4 (Fixed)</div>
           <div class="hud-row">
-            <span>Phase:</span>
+            <span>Phase</span>
             <strong id="hudFixed_Phase">NS GREEN</strong>
           </div>
           <div class="hud-row">
-            <span>N/S Signal:</span>
-            <strong id="hudFixed_NSTimer" style="color:#34d399;">🟢 18.0s</strong>
+            <span>N/S Signal</span>
+            <strong id="hudFixed_NSTimer">18.0s</strong>
           </div>
           <div class="hud-row">
-            <span>E/W Signal:</span>
-            <strong id="hudFixed_EWTimer" style="color:#ef4444;">🔴 23.0s</strong>
+            <span>E/W Signal</span>
+            <strong id="hudFixed_EWTimer">23.0s</strong>
           </div>
           <div class="hud-row">
-            <span>Avg Delay:</span>
+            <span>Avg Delay</span>
             <strong id="hudFixed_Delay" style="color: #f87171;">0.0s</strong>
           </div>
           <div class="hud-row">
-            <span>Queue:</span>
+            <span>Queue</span>
             <strong id="hudFixed_Queue">0 veh</strong>
           </div>
         </div>
@@ -759,13 +771,28 @@ def generate_intersection_html(playback_json: str) -> str:
     </div>
   </div>
 
-  <!-- Bottom Floating Playback Dock -->
+  <!-- Bottom Floating Playback Dock (Pure Inline SVG) -->
   <div class="playback-dock">
-    <button class="dock-btn" title="Rewind 5s (⏮)" onclick="stepBy(-5)">⏮</button>
-    <button class="dock-btn" title="Step Back 1s (◀)" onclick="stepBy(-1)">◀</button>
-    <button class="dock-btn primary" id="btnPlayPause" title="Play / Pause" onclick="togglePlay()">⏸</button>
-    <button class="dock-btn" title="Step Forward 1s (▶)" onclick="stepBy(1)">▶</button>
-    <button class="dock-btn" title="Fast-Forward 5s (⏭)" onclick="stepBy(5)">⏭</button>
+    <!-- Rewind 5s -->
+    <button class="dock-btn" title="Rewind 5s" onclick="stepBy(-5)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 19 2 12 11 5 11 19"/><polygon points="22 19 13 12 22 5 22 19"/></svg>
+    </button>
+    <!-- Step Back 1s -->
+    <button class="dock-btn" title="Step Back 1s" onclick="stepBy(-1)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="19 20 9 12 19 4 19 20"/><line x1="5" y1="19" x2="5" y2="5"/></svg>
+    </button>
+    <!-- Play / Pause -->
+    <button class="dock-btn primary" id="btnPlayPause" title="Play / Pause" onclick="togglePlay()">
+      <svg id="svgPlayPause" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+    </button>
+    <!-- Step Forward 1s -->
+    <button class="dock-btn" title="Step Forward 1s" onclick="stepBy(1)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 4 15 12 5 20 5 4"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+    </button>
+    <!-- Fast Forward 5s -->
+    <button class="dock-btn" title="Fast-Forward 5s" onclick="stepBy(5)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 19 22 12 13 5 13 19"/><polygon points="2 19 11 12 2 5 2 19"/></svg>
+    </button>
 
     <div class="scrubber-container">
       <input type="range" class="scrubber" id="timeScrubber" min="0" max="100" value="0" step="0.1" oninput="onScrub(this.value)" />
@@ -801,7 +828,7 @@ const frames = {playback_json};
 const totalFrames = frames.length;
 const maxTime = totalFrames > 0 ? frames[totalFrames - 1].t : 0;
 
-// Autoplay by default so site is immediately alive
+// Autoplay by default
 let currentPlaybackTime = 0.0;
 let isPlaying = true;
 let playbackSpeed = 1.0;
@@ -871,8 +898,14 @@ function setSpeed(spd) {{
 
 function togglePlay() {{
   isPlaying = !isPlaying;
-  const btn = document.getElementById('btnPlayPause');
-  btn.textContent = isPlaying ? '⏸' : '▶';
+  const svg = document.getElementById('svgPlayPause');
+  if (isPlaying) {{
+    // Show pause icon
+    svg.innerHTML = '<rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/>';
+  }} else {{
+    // Show play icon
+    svg.innerHTML = '<polygon points="5 3 19 12 5 21 5 3"/>';
+  }}
   if (isPlaying && currentPlaybackTime >= maxTime) {{
     currentPlaybackTime = 0.0;
   }}
@@ -890,7 +923,7 @@ function onScrub(val) {{
   renderFrame(currentPlaybackTime);
 }}
 
-// Interactive phase switch: advances to next phase transition in frames
+// Interactive phase switch
 function jumpToNextPhase() {{
   const curIdx = Math.min(totalFrames - 1, Math.floor(currentPlaybackTime));
   const curPhase = frames[curIdx].ml.phase_name;
@@ -902,7 +935,6 @@ function jumpToNextPhase() {{
       return;
     }}
   }}
-  // If no future phase transition in buffer, wrap to 0
   currentPlaybackTime = 0.0;
   scrubber.value = 0.0;
   renderFrame(0.0);
@@ -934,11 +966,11 @@ function getFrameIndices(t) {{
 function computeVisualPositions(vehicles, width, height) {{
   const cx = width / 2;
   const cy = height / 2;
-  const D_STOP = 100; // px from center to stop line
-  const LANE_OFFSET = 44; // px offset from center stripe to right-hand driving lane
+  const D_STOP = 100;
+  const LANE_OFFSET = 44;
   const CAR_LENGTH = 36;
   const MIN_GAP = 8;
-  const CAR_SPACING = CAR_LENGTH + MIN_GAP; // 44px between bumper centers in queue
+  const CAR_SPACING = CAR_LENGTH + MIN_GAP;
 
   const byApp = {{ N: [], S: [], E: [], W: [] }};
   (vehicles || []).forEach(v => {{
@@ -949,29 +981,24 @@ function computeVisualPositions(vehicles, width, height) {{
 
   ['N', 'S', 'E', 'W'].forEach(app => {{
     const list = byApp[app];
-    // Sort leaders first (highest pos first)
     list.sort((a, b) => b.pos - a.pos);
 
     let lastVisualDist = -9999;
 
     list.forEach((v, idx) => {{
-      let visualDistFromStop = 0; // >0: before stop line, <0: crossing/departing past stop line
+      let visualDistFromStop = 0;
 
       if (v.pos >= 150.0) {{
-        // Traversing or cleared intersection:
-        // 150m to 170m crosses center junction (0 to 200px)
-        // >170m continues along departure road off the screen
+        // Traversing or clearing intersection
         const crossMeters = v.pos - 150.0;
         visualDistFromStop = - (crossMeters / 20.0) * (D_STOP * 2);
       }} else {{
         // Approaching or queued behind stop line
         const distMeters = 150.0 - v.pos;
-        // Map 150m approach smoothly: 1.8 px/meter
         const rawPixels = distMeters * 1.8;
         if (idx === 0) {{
           visualDistFromStop = Math.max(0, rawPixels);
         }} else {{
-          // Guaranteed anti-overlap rule: must be at least CAR_SPACING behind lead vehicle
           const minAllowed = lastVisualDist + CAR_SPACING;
           visualDistFromStop = Math.max(rawPixels, minAllowed);
         }}
@@ -981,27 +1008,20 @@ function computeVisualPositions(vehicles, width, height) {{
 
       let x = cx, y = cy, rot = 0;
 
-      // Authentic right-hand driving lanes & headings:
-      // North: drives South (+y) on West lane (cx - LANE_OFFSET), heading rot=90
+      // Authentic right-hand driving lanes
       if (app === 'N') {{
         x = cx - LANE_OFFSET;
         y = (cy - D_STOP) - visualDistFromStop;
         rot = 90;
-      }}
-      // South: drives North (-y) on East lane (cx + LANE_OFFSET), heading rot=-90
-      else if (app === 'S') {{
+      }} else if (app === 'S') {{
         x = cx + LANE_OFFSET;
         y = (cy + D_STOP) + visualDistFromStop;
         rot = -90;
-      }}
-      // West: drives East (+x) on South lane (cy + LANE_OFFSET), heading rot=0
-      else if (app === 'W') {{
+      }} else if (app === 'W') {{
         x = (cx - D_STOP) - visualDistFromStop;
         y = cy + LANE_OFFSET;
         rot = 0;
-      }}
-      // East: drives West (-x) on North lane (cy - LANE_OFFSET), heading rot=180
-      else if (app === 'E') {{
+      }} else if (app === 'E') {{
         x = (cx + D_STOP) + visualDistFromStop;
         y = cy - LANE_OFFSET;
         rot = 180;
@@ -1038,8 +1058,8 @@ function renderScene(scenePrefix, simData, width, height) {{
     }}
     const timer = document.getElementById(`timer${{scenePrefix}}_${{arm}}`);
     if (timer) {{
-      const icon = nsColor === 'GREEN' ? '🟢' : (nsColor === 'YELLOW' ? '🟡' : '🔴');
-      timer.textContent = `${{icon}} ${{Math.ceil(nsTimer)}}s`;
+      const pipClass = nsColor === 'GREEN' ? 'green' : (nsColor === 'YELLOW' ? 'yellow' : 'red');
+      timer.innerHTML = `<span class="timer-pip ${{pipClass}}"></span><span class="timer-text">${{Math.ceil(nsTimer)}}s</span>`;
       timer.style.color = nsColor === 'GREEN' ? '#34d399' : (nsColor === 'YELLOW' ? '#ffcc00' : '#ff453a');
     }}
   }});
@@ -1051,8 +1071,8 @@ function renderScene(scenePrefix, simData, width, height) {{
     }}
     const timer = document.getElementById(`timer${{scenePrefix}}_${{arm}}`);
     if (timer) {{
-      const icon = ewColor === 'GREEN' ? '🟢' : (ewColor === 'YELLOW' ? '🟡' : '🔴');
-      timer.textContent = `${{icon}} ${{Math.ceil(ewTimer)}}s`;
+      const pipClass = ewColor === 'GREEN' ? 'green' : (ewColor === 'YELLOW' ? 'yellow' : 'red');
+      timer.innerHTML = `<span class="timer-pip ${{pipClass}}"></span><span class="timer-text">${{Math.ceil(ewTimer)}}s</span>`;
       timer.style.color = ewColor === 'GREEN' ? '#34d399' : (ewColor === 'YELLOW' ? '#ffcc00' : '#ff453a');
     }}
   }});
@@ -1068,13 +1088,11 @@ function renderScene(scenePrefix, simData, width, height) {{
   if (hudPlan) hudPlan.textContent = `Plan ${{simData.plan}} (${{simData.ns_green}}s / ${{simData.ew_green}}s)`;
   if (hudPhase) hudPhase.textContent = simData.phase_name;
   if (hudNSTimer) {{
-    const icon = nsColor === 'GREEN' ? '🟢' : (nsColor === 'YELLOW' ? '🟡' : '🔴');
-    hudNSTimer.textContent = `${{icon}} ${{Math.ceil(nsTimer)}}s`;
+    hudNSTimer.innerHTML = `<span class="timer-pip ${{nsColor === 'GREEN' ? 'green' : (nsColor === 'YELLOW' ? 'yellow' : 'red')}}"></span> ${{Math.ceil(nsTimer)}}s`;
     hudNSTimer.style.color = nsColor === 'GREEN' ? '#34d399' : (nsColor === 'YELLOW' ? '#ffcc00' : '#ff453a');
   }}
   if (hudEWTimer) {{
-    const icon = ewColor === 'GREEN' ? '🟢' : (ewColor === 'YELLOW' ? '🟡' : '🔴');
-    hudEWTimer.textContent = `${{icon}} ${{Math.ceil(ewTimer)}}s`;
+    hudEWTimer.innerHTML = `<span class="timer-pip ${{ewColor === 'GREEN' ? 'green' : (ewColor === 'YELLOW' ? 'yellow' : 'red')}}"></span> ${{Math.ceil(ewTimer)}}s`;
     hudEWTimer.style.color = ewColor === 'GREEN' ? '#34d399' : (ewColor === 'YELLOW' ? '#ffcc00' : '#ff453a');
   }}
   if (hudDelay) hudDelay.textContent = `${{simData.metrics.comp_delay.toFixed(1)}}s`;
@@ -1088,7 +1106,6 @@ function renderScene(scenePrefix, simData, width, height) {{
   const visualVehicles = computeVisualPositions(simData.vehicles, width, height);
 
   visualVehicles.forEach(v => {{
-    // Skip vehicles that have fully left the scene bounds
     if (v.x < -60 || v.x > width + 60 || v.y < -60 || v.y > height + 60) {{
       return;
     }}
@@ -1102,7 +1119,7 @@ function renderScene(scenePrefix, simData, width, height) {{
     car.style.top = `${{v.y - 10}}px`;
     car.style.transform = `rotate(${{v.rot}}deg)`;
 
-    // Dynamic lights
+    // Lights
     const blTop = document.createElement('div'); blTop.className = 'brake-light bl-top'; car.appendChild(blTop);
     const blBot = document.createElement('div'); blBot.className = 'brake-light bl-bot'; car.appendChild(blBot);
     const hlTop = document.createElement('div'); hlTop.className = 'headlight hl-top'; car.appendChild(hlTop);
@@ -1136,7 +1153,6 @@ function renderFrame(t) {{
     }});
   }}
 
-  // Accurate interpolated countdown timers
   const dtSec = f2 ? (f2.t - f1.t) * alpha : 0;
   const curML = {{
     ...f1.ml,
@@ -1183,7 +1199,7 @@ function animTick(timestamp) {{
   if (isPlaying) {{
     currentPlaybackTime += dtSec * playbackSpeed;
     if (currentPlaybackTime >= maxTime) {{
-      currentPlaybackTime = 0.0; // Loop seamlessly
+      currentPlaybackTime = 0.0;
     }}
     renderFrame(currentPlaybackTime);
   }}
