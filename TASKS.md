@@ -169,7 +169,7 @@
   - Implement confidence thresholding to prevent spurious switching under balanced demand
   - Optimize `src/ml/evaluate.py` to reuse predictor instance and avoid disk reload in loop
 
-- [ ] **Task I5: Multi-Scenario Benchmark Re-evaluation, Test Suite Verification & Documentation**
+- [x] **Task I5: Multi-Scenario Benchmark Re-evaluation, Test Suite Verification & Documentation**
   - Run full benchmark evaluation across held-out test scenarios and measure delay reduction
   - Execute full test suite (`pytest tests/ -v`) verifying zero regressions
   - Update `results/metrics/`, `README.md`, and `TASKS.md` with final verified performance

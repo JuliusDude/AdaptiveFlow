@@ -83,7 +83,7 @@ pip install -r requirements.txt
 
 ### 2. Run Automated Test Suite
 
-Run all 30 unit, integration, and benchmark tests:
+Run all 31 unit, integration, and benchmark tests:
 
 ```bash
 python -m pytest tests/ -v
@@ -91,18 +91,18 @@ python -m pytest tests/ -v
 
 ### 3. Generate Training Dataset
 
-Generate 500+ traffic scenarios with multi-core parallel forward optimization:
+Generate 600+ traffic scenarios with 140s multi-cycle forward optimization:
 
 ```bash
-python -m src.ml.dataset --num_scenarios 500 --workers 8
+python -m src.ml.dataset --num_scenarios 600 --horizon 140 --workers 4
 ```
 
-### 4. Train Random Forest Model
+### 4. Train Random Forest Model Pipeline
 
-Train and evaluate the multiclass Random Forest timing plan predictor:
+Train and evaluate the feature-engineered, regularized Random Forest timing plan predictor:
 
 ```bash
-python -m src.ml.train --n_estimators 100 --max_depth 12
+python -m src.ml.train --n_estimators 150 --max_depth 8 --min_samples_leaf 2
 ```
 
 ### 5. Run Offline Comparative Benchmark
@@ -125,15 +125,17 @@ streamlit run src/dashboard/app.py
 
 ## 📊 Benchmark Evaluation Results
 
-Comparative performance on held-out test traffic scenarios (full-demand evaluation across 25 unseen scenarios):
+Comparative performance on held-out test traffic scenarios (full-demand evaluation across 25 unseen scenarios, 280s duration):
 
 | Metric | Fixed Baseline ($P_4$) | ML Adaptive Controller | Relative Improvement |
 |:---|:---:|:---:|:---:|
-| **Comprehensive Delay** | 48.55 s | **47.46 s** | **-2.25% overall delay reduction** |
-| **Exited-Only Delay** | 44.18 s | **43.51 s** | **-1.52% delay reduction** |
-| **Average Queue Length** | 61.67 veh | **60.42 veh** | **-2.03% queue reduction** |
-| **Network Throughput** | 3094.5 vph | **3121.7 vph** | **+27.2 vph gain** |
-| **Asymmetric Heavy Demand** | 62.37 s | **59.91 s** | **Up to 4-15% delay reduction** |
+| **Comprehensive Delay** | 38.62 s | **37.89 s** | **-1.89% overall delay reduction** |
+| **Exited-Only Delay** | 35.86 s | **35.68 s** | **-0.50% delay reduction** |
+| **Average Queue Length** | 43.56 veh | **42.76 veh** | **-1.84% queue reduction** |
+| **Network Throughput** | 3132.0 vph | **3161.3 vph** | **+29.3 vph gain** |
+| **Validation Accuracy** | — | **58.89%** | **+14.89% gain over baseline RF** |
+| **Validation Macro F1** | — | **0.5435** | **+39.5% gain over baseline RF** |
+| **Asymmetric Demand Scenarios** | 63.60 s | **62.02 s** | **Up to 3.82% delay reduction** |
 
 *Comprehensive delay combines completed vehicle trip delays and active queue waiting times, eliminating survivorship bias.*
 

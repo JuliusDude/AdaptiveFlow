@@ -1,546 +1,546 @@
 {
   "scenarios_evaluated": 25,
   "fixed_baseline": {
-    "comprehensive_delay_s": 48.55,
-    "exited_delay_s": 44.18,
-    "average_queue": 61.67,
-    "average_throughput_vph": 3094.5
+    "comprehensive_delay_s": 38.62,
+    "exited_delay_s": 35.86,
+    "average_queue": 43.56,
+    "average_throughput_vph": 3132.0
   },
   "ml_adaptive": {
-    "comprehensive_delay_s": 47.46,
-    "exited_delay_s": 43.51,
-    "average_queue": 60.42,
-    "average_throughput_vph": 3121.7
+    "comprehensive_delay_s": 37.89,
+    "exited_delay_s": 35.68,
+    "average_queue": 42.76,
+    "average_throughput_vph": 3161.3
   },
   "comparison": {
-    "delay_reduction_pct": 2.25,
-    "queue_reduction_pct": 2.03,
-    "throughput_gain_vph": 27.2
+    "delay_reduction_pct": 1.89,
+    "queue_reduction_pct": 1.84,
+    "throughput_gain_vph": 29.3
   },
   "scenario_details": [
     {
-      "scenario_id": 426,
+      "scenario_id": 511,
       "rates": {
-        "N": 36.3,
-        "S": 27.7,
-        "E": 10.0,
-        "W": 7.5
+        "N": 16.1,
+        "S": 16.8,
+        "E": 23.6,
+        "W": 17.1
       },
-      "fixed_comprehensive_delay": 52.99,
-      "ml_comprehensive_delay": 51.77,
-      "fixed_exited_delay": 44.15,
-      "ml_exited_delay": 45.66,
-      "delay_improvement_pct": 2.3,
+      "fixed_comprehensive_delay": 31.0,
+      "ml_comprehensive_delay": 31.5,
+      "fixed_exited_delay": 31.3,
+      "ml_exited_delay": 31.72,
+      "delay_improvement_pct": -1.61,
       "plans_selected": [
         "P4",
-        "P7",
-        "P7",
-        "P7",
-        "P7"
+        "P3",
+        "P3",
+        "P3",
+        "P2"
       ]
     },
     {
-      "scenario_id": 427,
+      "scenario_id": 512,
       "rates": {
-        "N": 41.0,
-        "S": 28.8,
-        "E": 5.9,
-        "W": 7.9
-      },
-      "fixed_comprehensive_delay": 62.37,
-      "ml_comprehensive_delay": 59.91,
-      "fixed_exited_delay": 47.14,
-      "ml_exited_delay": 47.31,
-      "delay_improvement_pct": 3.94,
-      "plans_selected": [
-        "P4",
-        "P7",
-        "P7",
-        "P7",
-        "P7"
-      ]
-    },
-    {
-      "scenario_id": 428,
-      "rates": {
-        "N": 5.4,
-        "S": 8.1,
-        "E": 43.2,
-        "W": 32.1
-      },
-      "fixed_comprehensive_delay": 69.21,
-      "ml_comprehensive_delay": 68.19,
-      "fixed_exited_delay": 65.33,
-      "ml_exited_delay": 63.54,
-      "delay_improvement_pct": 1.47,
-      "plans_selected": [
-        "P4",
-        "P1",
-        "P2",
-        "P1",
-        "P1"
-      ]
-    },
-    {
-      "scenario_id": 429,
-      "rates": {
-        "N": 24.1,
-        "S": 21.0,
+        "N": 19.1,
+        "S": 18.3,
         "E": 16.7,
-        "W": 12.9
+        "W": 16.8
       },
-      "fixed_comprehensive_delay": 26.43,
-      "ml_comprehensive_delay": 26.03,
-      "fixed_exited_delay": 25.95,
-      "ml_exited_delay": 26.17,
-      "delay_improvement_pct": 1.51,
-      "plans_selected": [
-        "P4",
-        "P5",
-        "P5",
-        "P5",
-        "P4"
-      ]
-    },
-    {
-      "scenario_id": 430,
-      "rates": {
-        "N": 6.6,
-        "S": 5.5,
-        "E": 36.0,
-        "W": 28.1
-      },
-      "fixed_comprehensive_delay": 62.06,
-      "ml_comprehensive_delay": 59.22,
-      "fixed_exited_delay": 62.36,
-      "ml_exited_delay": 57.82,
-      "delay_improvement_pct": 4.58,
-      "plans_selected": [
-        "P4",
-        "P1",
-        "P1",
-        "P1",
-        "P1"
-      ]
-    },
-    {
-      "scenario_id": 431,
-      "rates": {
-        "N": 42.9,
-        "S": 26.0,
-        "E": 5.4,
-        "W": 7.2
-      },
-      "fixed_comprehensive_delay": 62.64,
-      "ml_comprehensive_delay": 60.77,
-      "fixed_exited_delay": 50.64,
-      "ml_exited_delay": 50.97,
-      "delay_improvement_pct": 2.99,
-      "plans_selected": [
-        "P4",
-        "P7",
-        "P7",
-        "P7",
-        "P7"
-      ]
-    },
-    {
-      "scenario_id": 432,
-      "rates": {
-        "N": 5.5,
-        "S": 5.4,
-        "E": 41.0,
-        "W": 31.0
-      },
-      "fixed_comprehensive_delay": 62.56,
-      "ml_comprehensive_delay": 60.58,
-      "fixed_exited_delay": 60.13,
-      "ml_exited_delay": 56.64,
-      "delay_improvement_pct": 3.16,
-      "plans_selected": [
-        "P4",
-        "P1",
-        "P1",
-        "P1",
-        "P1"
-      ]
-    },
-    {
-      "scenario_id": 433,
-      "rates": {
-        "N": 43.8,
-        "S": 25.1,
-        "E": 7.1,
-        "W": 8.9
-      },
-      "fixed_comprehensive_delay": 46.82,
-      "ml_comprehensive_delay": 45.52,
-      "fixed_exited_delay": 36.56,
-      "ml_exited_delay": 37.3,
-      "delay_improvement_pct": 2.78,
-      "plans_selected": [
-        "P4",
-        "P7",
-        "P7",
-        "P7",
-        "P7"
-      ]
-    },
-    {
-      "scenario_id": 434,
-      "rates": {
-        "N": 32.6,
-        "S": 21.7,
-        "E": 10.7,
-        "W": 9.0
-      },
-      "fixed_comprehensive_delay": 47.26,
-      "ml_comprehensive_delay": 45.76,
-      "fixed_exited_delay": 35.64,
-      "ml_exited_delay": 36.21,
-      "delay_improvement_pct": 3.17,
-      "plans_selected": [
-        "P4",
-        "P6",
-        "P7",
-        "P7",
-        "P4"
-      ]
-    },
-    {
-      "scenario_id": 435,
-      "rates": {
-        "N": 9.9,
-        "S": 9.0,
-        "E": 29.3,
-        "W": 22.8
-      },
-      "fixed_comprehensive_delay": 43.81,
-      "ml_comprehensive_delay": 43.01,
-      "fixed_exited_delay": 43.77,
-      "ml_exited_delay": 42.39,
-      "delay_improvement_pct": 1.83,
-      "plans_selected": [
-        "P4",
-        "P1",
-        "P1",
-        "P2",
-        "P1"
-      ]
-    },
-    {
-      "scenario_id": 436,
-      "rates": {
-        "N": 11.4,
-        "S": 8.5,
-        "E": 30.0,
-        "W": 22.5
-      },
-      "fixed_comprehensive_delay": 42.62,
-      "ml_comprehensive_delay": 39.91,
-      "fixed_exited_delay": 44.11,
-      "ml_exited_delay": 40.17,
-      "delay_improvement_pct": 6.36,
-      "plans_selected": [
-        "P4",
-        "P1",
-        "P1",
-        "P1",
-        "P1"
-      ]
-    },
-    {
-      "scenario_id": 437,
-      "rates": {
-        "N": 24.0,
-        "S": 13.3,
-        "E": 10.9,
-        "W": 16.2
-      },
-      "fixed_comprehensive_delay": 19.88,
-      "ml_comprehensive_delay": 19.16,
-      "fixed_exited_delay": 19.88,
-      "ml_exited_delay": 19.42,
-      "delay_improvement_pct": 3.62,
-      "plans_selected": [
-        "P4",
-        "P7",
-        "P4",
-        "P5",
-        "P4"
-      ]
-    },
-    {
-      "scenario_id": 438,
-      "rates": {
-        "N": 6.7,
-        "S": 8.1,
-        "E": 43.2,
-        "W": 28.3
-      },
-      "fixed_comprehensive_delay": 56.93,
-      "ml_comprehensive_delay": 54.74,
-      "fixed_exited_delay": 53.17,
-      "ml_exited_delay": 49.57,
-      "delay_improvement_pct": 3.85,
-      "plans_selected": [
-        "P4",
-        "P1",
-        "P1",
-        "P1",
-        "P1"
-      ]
-    },
-    {
-      "scenario_id": 439,
-      "rates": {
-        "N": 39.9,
-        "S": 33.2,
-        "E": 8.3,
-        "W": 8.0
-      },
-      "fixed_comprehensive_delay": 61.17,
-      "ml_comprehensive_delay": 59.41,
-      "fixed_exited_delay": 49.56,
-      "ml_exited_delay": 50.94,
-      "delay_improvement_pct": 2.88,
-      "plans_selected": [
-        "P4",
-        "P7",
-        "P7",
-        "P7",
-        "P6"
-      ]
-    },
-    {
-      "scenario_id": 440,
-      "rates": {
-        "N": 10.2,
-        "S": 14.6,
-        "E": 29.6,
-        "W": 23.1
-      },
-      "fixed_comprehensive_delay": 43.35,
-      "ml_comprehensive_delay": 42.6,
-      "fixed_exited_delay": 44.16,
-      "ml_exited_delay": 42.9,
-      "delay_improvement_pct": 1.73,
-      "plans_selected": [
-        "P4",
-        "P2",
-        "P1",
-        "P2",
-        "P1"
-      ]
-    },
-    {
-      "scenario_id": 441,
-      "rates": {
-        "N": 9.8,
-        "S": 6.5,
-        "E": 42.3,
-        "W": 29.9
-      },
-      "fixed_comprehensive_delay": 62.23,
-      "ml_comprehensive_delay": 61.31,
-      "fixed_exited_delay": 59.03,
-      "ml_exited_delay": 57.51,
-      "delay_improvement_pct": 1.48,
-      "plans_selected": [
-        "P4",
-        "P1",
-        "P1",
-        "P1",
-        "P1"
-      ]
-    },
-    {
-      "scenario_id": 442,
-      "rates": {
-        "N": 30.6,
-        "S": 22.8,
-        "E": 13.5,
-        "W": 10.6
-      },
-      "fixed_comprehensive_delay": 46.83,
-      "ml_comprehensive_delay": 46.38,
-      "fixed_exited_delay": 40.13,
-      "ml_exited_delay": 41.25,
-      "delay_improvement_pct": 0.96,
-      "plans_selected": [
-        "P4",
-        "P6",
-        "P7",
-        "P6",
-        "P7"
-      ]
-    },
-    {
-      "scenario_id": 443,
-      "rates": {
-        "N": 32.7,
-        "S": 25.5,
-        "E": 12.8,
-        "W": 11.9
-      },
-      "fixed_comprehensive_delay": 47.79,
-      "ml_comprehensive_delay": 47.29,
-      "fixed_exited_delay": 37.66,
-      "ml_exited_delay": 40.17,
-      "delay_improvement_pct": 1.05,
-      "plans_selected": [
-        "P4",
-        "P7",
-        "P7",
-        "P7",
-        "P7"
-      ]
-    },
-    {
-      "scenario_id": 444,
-      "rates": {
-        "N": 33.5,
-        "S": 13.7,
-        "E": 29.5,
-        "W": 30.4
-      },
-      "fixed_comprehensive_delay": 65.52,
-      "ml_comprehensive_delay": 65.48,
-      "fixed_exited_delay": 63.77,
-      "ml_exited_delay": 62.86,
-      "delay_improvement_pct": 0.06,
-      "plans_selected": [
-        "P4",
-        "P2",
-        "P2",
-        "P2",
-        "P2"
-      ]
-    },
-    {
-      "scenario_id": 445,
-      "rates": {
-        "N": 28.6,
-        "S": 24.4,
-        "E": 14.5,
-        "W": 15.0
-      },
-      "fixed_comprehensive_delay": 28.27,
-      "ml_comprehensive_delay": 27.7,
+      "fixed_comprehensive_delay": 25.42,
+      "ml_comprehensive_delay": 25.37,
       "fixed_exited_delay": 25.62,
-      "ml_exited_delay": 25.68,
-      "delay_improvement_pct": 2.02,
+      "ml_exited_delay": 25.08,
+      "delay_improvement_pct": 0.2,
       "plans_selected": [
         "P4",
-        "P4",
-        "P6",
         "P5",
-        "P4"
+        "P4",
+        "P3",
+        "P5"
       ]
     },
     {
-      "scenario_id": 446,
+      "scenario_id": 513,
       "rates": {
-        "N": 9.7,
-        "S": 12.6,
-        "E": 33.7,
-        "W": 27.9
+        "N": 7.0,
+        "S": 7.5,
+        "E": 39.0,
+        "W": 28.2
       },
-      "fixed_comprehensive_delay": 53.19,
-      "ml_comprehensive_delay": 52.37,
-      "fixed_exited_delay": 51.56,
-      "ml_exited_delay": 50.15,
-      "delay_improvement_pct": 1.54,
+      "fixed_comprehensive_delay": 63.6,
+      "ml_comprehensive_delay": 62.02,
+      "fixed_exited_delay": 56.74,
+      "ml_exited_delay": 53.91,
+      "delay_improvement_pct": 2.48,
       "plans_selected": [
         "P4",
-        "P1",
         "P2",
         "P1",
-        "P2"
+        "P1",
+        "P1"
       ]
     },
     {
-      "scenario_id": 447,
+      "scenario_id": 514,
+      "rates": {
+        "N": 5.3,
+        "S": 7.1,
+        "E": 40.2,
+        "W": 26.8
+      },
+      "fixed_comprehensive_delay": 60.25,
+      "ml_comprehensive_delay": 59.29,
+      "fixed_exited_delay": 47.36,
+      "ml_exited_delay": 45.45,
+      "delay_improvement_pct": 1.59,
+      "plans_selected": [
+        "P4",
+        "P2",
+        "P1",
+        "P1",
+        "P1"
+      ]
+    },
+    {
+      "scenario_id": 515,
+      "rates": {
+        "N": 9.4,
+        "S": 13.6,
+        "E": 31.8,
+        "W": 20.1
+      },
+      "fixed_comprehensive_delay": 38.99,
+      "ml_comprehensive_delay": 38.14,
+      "fixed_exited_delay": 37.69,
+      "ml_exited_delay": 35.75,
+      "delay_improvement_pct": 2.18,
+      "plans_selected": [
+        "P4",
+        "P2",
+        "P1",
+        "P1",
+        "P1"
+      ]
+    },
+    {
+      "scenario_id": 516,
+      "rates": {
+        "N": 37.9,
+        "S": 30.3,
+        "E": 8.3,
+        "W": 7.7
+      },
+      "fixed_comprehensive_delay": 63.07,
+      "ml_comprehensive_delay": 61.74,
+      "fixed_exited_delay": 49.87,
+      "ml_exited_delay": 51.62,
+      "delay_improvement_pct": 2.11,
+      "plans_selected": [
+        "P4",
+        "P6",
+        "P7",
+        "P7",
+        "P7"
+      ]
+    },
+    {
+      "scenario_id": 517,
+      "rates": {
+        "N": 20.9,
+        "S": 19.6,
+        "E": 16.8,
+        "W": 14.0
+      },
+      "fixed_comprehensive_delay": 28.79,
+      "ml_comprehensive_delay": 28.69,
+      "fixed_exited_delay": 25.39,
+      "ml_exited_delay": 27.68,
+      "delay_improvement_pct": 0.35,
+      "plans_selected": [
+        "P4",
+        "P5",
+        "P6",
+        "P7",
+        "P5"
+      ]
+    },
+    {
+      "scenario_id": 518,
       "rates": {
         "N": 25.6,
-        "S": 22.8,
-        "E": 15.5,
-        "W": 15.2
+        "S": 22.0,
+        "E": 11.3,
+        "W": 12.0
       },
-      "fixed_comprehensive_delay": 31.98,
-      "ml_comprehensive_delay": 31.98,
-      "fixed_exited_delay": 30.41,
-      "ml_exited_delay": 30.41,
-      "delay_improvement_pct": 0.0,
+      "fixed_comprehensive_delay": 35.98,
+      "ml_comprehensive_delay": 34.8,
+      "fixed_exited_delay": 33.24,
+      "ml_exited_delay": 34.0,
+      "delay_improvement_pct": 3.28,
       "plans_selected": [
         "P4",
+        "P6",
+        "P7",
+        "P7",
+        "P7"
+      ]
+    },
+    {
+      "scenario_id": 519,
+      "rates": {
+        "N": 12.3,
+        "S": 12.3,
+        "E": 26.2,
+        "W": 19.1
+      },
+      "fixed_comprehensive_delay": 23.06,
+      "ml_comprehensive_delay": 22.2,
+      "fixed_exited_delay": 24.69,
+      "ml_exited_delay": 23.65,
+      "delay_improvement_pct": 3.73,
+      "plans_selected": [
         "P4",
-        "P4",
+        "P2",
+        "P2",
         "P4",
         "P3"
       ]
     },
     {
-      "scenario_id": 448,
+      "scenario_id": 520,
       "rates": {
-        "N": 7.7,
-        "S": 9.0,
-        "E": 39.2,
-        "W": 34.0
+        "N": 15.8,
+        "S": 13.7,
+        "E": 24.7,
+        "W": 20.1
       },
-      "fixed_comprehensive_delay": 58.07,
-      "ml_comprehensive_delay": 57.35,
-      "fixed_exited_delay": 57.18,
-      "ml_exited_delay": 55.94,
-      "delay_improvement_pct": 1.24,
+      "fixed_comprehensive_delay": 29.39,
+      "ml_comprehensive_delay": 28.94,
+      "fixed_exited_delay": 29.75,
+      "ml_exited_delay": 28.83,
+      "delay_improvement_pct": 1.53,
       "plans_selected": [
         "P4",
-        "P1",
-        "P1",
+        "P2",
         "P3",
-        "P1"
+        "P2",
+        "P3"
       ]
     },
     {
-      "scenario_id": 449,
+      "scenario_id": 521,
       "rates": {
-        "N": 22.9,
-        "S": 20.0,
-        "E": 16.0,
-        "W": 13.0
+        "N": 9.8,
+        "S": 9.6,
+        "E": 30.5,
+        "W": 20.9
       },
-      "fixed_comprehensive_delay": 32.89,
-      "ml_comprehensive_delay": 33.17,
-      "fixed_exited_delay": 29.01,
-      "ml_exited_delay": 29.38,
-      "delay_improvement_pct": -0.85,
+      "fixed_comprehensive_delay": 39.84,
+      "ml_comprehensive_delay": 38.32,
+      "fixed_exited_delay": 40.72,
+      "ml_exited_delay": 38.26,
+      "delay_improvement_pct": 3.82,
       "plans_selected": [
         "P4",
-        "P7",
+        "P2",
+        "P1",
+        "P1",
+        "P2"
+      ]
+    },
+    {
+      "scenario_id": 522,
+      "rates": {
+        "N": 23.6,
+        "S": 17.2,
+        "E": 16.2,
+        "W": 14.1
+      },
+      "fixed_comprehensive_delay": 24.78,
+      "ml_comprehensive_delay": 24.53,
+      "fixed_exited_delay": 24.59,
+      "ml_exited_delay": 24.79,
+      "delay_improvement_pct": 1.01,
+      "plans_selected": [
         "P4",
+        "P6",
+        "P6",
+        "P5",
+        "P6"
+      ]
+    },
+    {
+      "scenario_id": 523,
+      "rates": {
+        "N": 20.6,
+        "S": 22.9,
+        "E": 15.5,
+        "W": 15.0
+      },
+      "fixed_comprehensive_delay": 33.11,
+      "ml_comprehensive_delay": 32.9,
+      "fixed_exited_delay": 31.24,
+      "ml_exited_delay": 31.86,
+      "delay_improvement_pct": 0.63,
+      "plans_selected": [
         "P4",
+        "P5",
+        "P6",
+        "P5",
         "P7"
       ]
     },
     {
-      "scenario_id": 450,
+      "scenario_id": 524,
       "rates": {
-        "N": 19.5,
-        "S": 19.5,
-        "E": 21.1,
-        "W": 17.9
+        "N": 34.6,
+        "S": 32.6,
+        "E": 5.7,
+        "W": 5.6
       },
-      "fixed_comprehensive_delay": 26.81,
-      "ml_comprehensive_delay": 26.79,
-      "fixed_exited_delay": 27.49,
-      "ml_exited_delay": 27.46,
-      "delay_improvement_pct": 0.07,
+      "fixed_comprehensive_delay": 67.83,
+      "ml_comprehensive_delay": 66.4,
+      "fixed_exited_delay": 57.76,
+      "ml_exited_delay": 59.75,
+      "delay_improvement_pct": 2.11,
+      "plans_selected": [
+        "P4",
+        "P6",
+        "P7",
+        "P7",
+        "P7"
+      ]
+    },
+    {
+      "scenario_id": 525,
+      "rates": {
+        "N": 24.4,
+        "S": 21.0,
+        "E": 13.5,
+        "W": 16.0
+      },
+      "fixed_comprehensive_delay": 25.9,
+      "ml_comprehensive_delay": 25.23,
+      "fixed_exited_delay": 24.4,
+      "ml_exited_delay": 24.99,
+      "delay_improvement_pct": 2.59,
       "plans_selected": [
         "P4",
         "P4",
-        "P2",
+        "P6",
+        "P6",
+        "P7"
+      ]
+    },
+    {
+      "scenario_id": 526,
+      "rates": {
+        "N": 15.4,
+        "S": 13.6,
+        "E": 14.3,
+        "W": 14.0
+      },
+      "fixed_comprehensive_delay": 19.28,
+      "ml_comprehensive_delay": 19.25,
+      "fixed_exited_delay": 19.49,
+      "ml_exited_delay": 19.45,
+      "delay_improvement_pct": 0.16,
+      "plans_selected": [
         "P4",
-        "P4"
+        "P5",
+        "P5",
+        "P4",
+        "P5"
+      ]
+    },
+    {
+      "scenario_id": 527,
+      "rates": {
+        "N": 13.7,
+        "S": 16.8,
+        "E": 19.2,
+        "W": 21.8
+      },
+      "fixed_comprehensive_delay": 28.65,
+      "ml_comprehensive_delay": 28.21,
+      "fixed_exited_delay": 30.33,
+      "ml_exited_delay": 29.47,
+      "delay_improvement_pct": 1.54,
+      "plans_selected": [
+        "P4",
+        "P2",
+        "P3",
+        "P3",
+        "P3"
+      ]
+    },
+    {
+      "scenario_id": 528,
+      "rates": {
+        "N": 5.9,
+        "S": 6.0,
+        "E": 43.2,
+        "W": 27.2
+      },
+      "fixed_comprehensive_delay": 65.11,
+      "ml_comprehensive_delay": 63.49,
+      "fixed_exited_delay": 60.01,
+      "ml_exited_delay": 57.1,
+      "delay_improvement_pct": 2.49,
+      "plans_selected": [
+        "P4",
+        "P2",
+        "P1",
+        "P1",
+        "P1"
+      ]
+    },
+    {
+      "scenario_id": 529,
+      "rates": {
+        "N": 22.4,
+        "S": 17.7,
+        "E": 15.7,
+        "W": 13.2
+      },
+      "fixed_comprehensive_delay": 37.42,
+      "ml_comprehensive_delay": 37.43,
+      "fixed_exited_delay": 33.48,
+      "ml_exited_delay": 35.23,
+      "delay_improvement_pct": -0.03,
+      "plans_selected": [
+        "P4",
+        "P6",
+        "P7",
+        "P7",
+        "P7"
+      ]
+    },
+    {
+      "scenario_id": 530,
+      "rates": {
+        "N": 30.6,
+        "S": 25.9,
+        "E": 13.8,
+        "W": 9.3
+      },
+      "fixed_comprehensive_delay": 37.72,
+      "ml_comprehensive_delay": 36.99,
+      "fixed_exited_delay": 36.2,
+      "ml_exited_delay": 37.23,
+      "delay_improvement_pct": 1.94,
+      "plans_selected": [
+        "P4",
+        "P6",
+        "P7",
+        "P7",
+        "P7"
+      ]
+    },
+    {
+      "scenario_id": 531,
+      "rates": {
+        "N": 28.7,
+        "S": 26.3,
+        "E": 14.8,
+        "W": 9.2
+      },
+      "fixed_comprehensive_delay": 38.21,
+      "ml_comprehensive_delay": 37.58,
+      "fixed_exited_delay": 32.25,
+      "ml_exited_delay": 33.67,
+      "delay_improvement_pct": 1.65,
+      "plans_selected": [
+        "P4",
+        "P5",
+        "P7",
+        "P7",
+        "P7"
+      ]
+    },
+    {
+      "scenario_id": 532,
+      "rates": {
+        "N": 7.2,
+        "S": 12.0,
+        "E": 21.1,
+        "W": 14.6
+      },
+      "fixed_comprehensive_delay": 20.82,
+      "ml_comprehensive_delay": 20.2,
+      "fixed_exited_delay": 21.72,
+      "ml_exited_delay": 20.56,
+      "delay_improvement_pct": 2.98,
+      "plans_selected": [
+        "P4",
+        "P5",
+        "P3",
+        "P2",
+        "P3"
+      ]
+    },
+    {
+      "scenario_id": 533,
+      "rates": {
+        "N": 28.2,
+        "S": 23.1,
+        "E": 11.5,
+        "W": 12.9
+      },
+      "fixed_comprehensive_delay": 32.67,
+      "ml_comprehensive_delay": 32.14,
+      "fixed_exited_delay": 30.09,
+      "ml_exited_delay": 31.31,
+      "delay_improvement_pct": 1.62,
+      "plans_selected": [
+        "P4",
+        "P5",
+        "P7",
+        "P7",
+        "P7"
+      ]
+    },
+    {
+      "scenario_id": 534,
+      "rates": {
+        "N": 30.1,
+        "S": 22.8,
+        "E": 13.0,
+        "W": 9.8
+      },
+      "fixed_comprehensive_delay": 39.03,
+      "ml_comprehensive_delay": 38.45,
+      "fixed_exited_delay": 36.44,
+      "ml_exited_delay": 37.95,
+      "delay_improvement_pct": 1.49,
+      "plans_selected": [
+        "P4",
+        "P5",
+        "P7",
+        "P7",
+        "P7"
+      ]
+    },
+    {
+      "scenario_id": 535,
+      "rates": {
+        "N": 5.1,
+        "S": 7.2,
+        "E": 40.4,
+        "W": 30.9
+      },
+      "fixed_comprehensive_delay": 55.54,
+      "ml_comprehensive_delay": 53.43,
+      "fixed_exited_delay": 56.22,
+      "ml_exited_delay": 52.57,
+      "delay_improvement_pct": 3.8,
+      "plans_selected": [
+        "P4",
+        "P2",
+        "P1",
+        "P1",
+        "P1"
       ]
     }
   ]
