@@ -145,22 +145,26 @@ class TimingOptimizer:
         # Net directional pressure (positive = NS heavier, negative = EW heavier)
         net_ns_pressure = (ns_queue - ew_queue) if (ns_queue != ew_queue) else (ns_demand - ew_demand)
 
-        def tie_break_key(p: str) -> Tuple[float, float, int]:
+        # Identify candidate plans within indifference tolerance (0.35s or 1.5% of min delay)
+        min_delay = min(all_delays.values())
+        tolerance = max(0.35, min_delay * 0.015)
+        near_optimal_plans = [p for p, d in all_delays.items() if d <= min_delay + tolerance]
+
+        def preference_key(p: str) -> Tuple[float, float]:
             idx = int(p[1:])
             offset = idx - 4  # Positive for NS priority, negative for EW priority, 0 for P4
-            delay = round(all_delays[p], 2)
             if net_ns_pressure > 0:
-                # NS demand heavier: prefer higher index (more NS green)
+                # NS demand heavier: prefer higher index (more NS green), then lower delay
                 pref = -float(offset)
             elif net_ns_pressure < 0:
-                # EW demand heavier: prefer lower index (more EW green)
+                # EW demand heavier: prefer lower index (more EW green), then lower delay
                 pref = float(offset)
             else:
-                # Symmetrically balanced demand: prefer balanced P4
+                # Symmetrically balanced demand: prefer balanced P4 (offset 0)
                 pref = float(abs(offset))
-            return (delay, pref, abs(offset))
+            return (pref, all_delays[p])
 
-        best_plan = min(self.candidate_plans, key=tie_break_key)
+        best_plan = min(near_optimal_plans, key=preference_key)
         return best_plan, all_delays[best_plan], all_delays
 
     def evaluate_scenario(
