@@ -1,8 +1,13 @@
-"""Model training pipeline for supervised Random Forest and Gradient Boosting signal timing classifiers."""
+import sys
+from pathlib import Path
+
+# Ensure repository root is in sys.path regardless of execution working directory
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
 import argparse
 import json
-from pathlib import Path
 from typing import Dict, Any, Tuple
 import joblib
 import numpy as np

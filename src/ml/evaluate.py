@@ -1,15 +1,19 @@
-"""Comparative benchmark evaluation: Fixed Baseline vs Adaptive ML Controller."""
+import sys
+from pathlib import Path
+
+# Ensure repository root is in sys.path regardless of execution working directory
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
 import argparse
 import json
-from pathlib import Path
 from typing import Dict, List, Any, Optional
 import pandas as pd
 from src.simulator.intersection import IntersectionSimulation
 from src.simulator.signal import TrafficSignal
 from src.simulator.traffic_generator import TrafficGenerator, SCENARIO_PRESETS
 from src.ml.predict import SignalTimingPredictor, AdaptiveMLController
-
 
 BENCHMARK_OUTPUT_PATH = Path("results/metrics/evaluation_benchmark.json")
 

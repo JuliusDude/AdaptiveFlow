@@ -1,6 +1,11 @@
-"""Real-time inference and closed-loop adaptive signal controller."""
-
+import sys
 from pathlib import Path
+
+# Ensure repository root is in sys.path regardless of execution working directory
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
 from typing import Dict, List, Optional, Union, Any, Tuple
 import joblib
 import numpy as np
@@ -9,7 +14,6 @@ from sklearn.ensemble import RandomForestClassifier
 from src.features.feature_engineering import FEATURE_NAMES, extract_features, features_to_vector
 from src.simulator.intersection import IntersectionSimulation
 from src.simulator.signal import TIMING_PLANS
-
 
 DEFAULT_MODEL_PATH = Path("models/random_forest.pkl")
 

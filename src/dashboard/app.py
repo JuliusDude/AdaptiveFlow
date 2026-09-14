@@ -4,8 +4,15 @@ Visualizes 4-way intersection dynamics, live signal phases, real-time ML decisio
 and head-to-head performance benchmarks between Fixed-Time and ML Adaptive controllers.
 """
 
-import json
+import sys
 from pathlib import Path
+
+# Ensure repository root is in sys.path regardless of working directory
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+import json
 from typing import Dict, List, Any
 import matplotlib.pyplot as plt
 import pandas as pd
