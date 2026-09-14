@@ -159,7 +159,7 @@
   - Rebalance archetype generation to strengthen intermediate classes ($P_2, P_3, P_5, P_6$)
   - Generate expanded, balanced dataset (600 scenarios) with multiprocessing
 
-- [ ] **Task I3: Model Optimization, Hyperparameter Regularization & Training**
+- [x] **Task I3: Model Optimization, Hyperparameter Regularization & Training**
   - Implement tuned, regularized model pipeline with `class_weight='balanced'`
   - Prevent extreme overfitting (closing 55% train-val gap) and eliminate zero-F1 class collapse
   - Train model, evaluate metrics, and serialize artifact to `models/random_forest.pkl`

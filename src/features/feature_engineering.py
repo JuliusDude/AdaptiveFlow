@@ -3,6 +3,7 @@
 from typing import Dict, List, Sequence, Tuple, Union
 import numpy as np
 import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
 from src.simulator.intersection import IntersectionSimulation
 
 
@@ -247,7 +248,7 @@ def compute_engineered_features(
         raise TypeError(f"Unsupported input type for compute_engineered_features: {type(features_input)}")
 
 
-class TrafficFeatureTransformer:
+class TrafficFeatureTransformer(BaseEstimator, TransformerMixin):
     """Scikit-learn compatible transformer that enriches 22 canonical features with directional interactions and ratios."""
 
     def fit(self, X, y=None):
