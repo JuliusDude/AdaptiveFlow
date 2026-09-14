@@ -154,10 +154,10 @@
   - Ensure compatibility with existing 22-feature simulator extraction
   - Unit test feature transformation and pipeline compatibility
 
-- [ ] **Task I2: Optimizer & Horizon Alignment in Dataset Generation**
+- [x] **Task I2: Optimizer & Horizon Alignment in Dataset Generation**
   - Align forward evaluation horizon to 140s (2 full cycles) to prevent myopic single-cycle bias
   - Rebalance archetype generation to strengthen intermediate classes ($P_2, P_3, P_5, P_6$)
-  - Generate expanded, balanced dataset (1000 scenarios) with multiprocessing
+  - Generate expanded, balanced dataset (600 scenarios) with multiprocessing
 
 - [ ] **Task I3: Model Optimization, Hyperparameter Regularization & Training**
   - Implement tuned, regularized model pipeline with `class_weight='balanced'`

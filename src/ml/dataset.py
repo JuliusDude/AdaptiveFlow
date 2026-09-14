@@ -28,66 +28,67 @@ def sample_scenario_rates(rng: random.Random) -> Dict[str, float]:
     ])
 
     if archetype == "balanced":
-        base = rng.uniform(12.0, 24.0)
-        return {app: round(base + rng.uniform(-2.5, 2.5), 1) for app in ("N", "S", "E", "W")}
+        # Target: P4 (30s NS / 30s EW)
+        base = rng.uniform(14.0, 22.0)
+        return {app: round(base + rng.uniform(-1.5, 1.5), 1) for app in ("N", "S", "E", "W")}
 
     elif archetype == "slight_ns":
-        # Target: P5 (35s NS / 25s EW)
+        # Target: P5 (35s NS / 25s EW) - Demand ratio ~1.3-1.45
         return {
-            "N": round(rng.uniform(22.0, 30.0), 1),
-            "S": round(rng.uniform(18.0, 26.0), 1),
-            "E": round(rng.uniform(12.0, 18.0), 1),
-            "W": round(rng.uniform(12.0, 18.0), 1),
+            "N": round(rng.uniform(19.0, 25.0), 1),
+            "S": round(rng.uniform(17.0, 23.0), 1),
+            "E": round(rng.uniform(13.0, 17.0), 1),
+            "W": round(rng.uniform(13.0, 17.0), 1),
         }
 
     elif archetype == "slight_ew":
-        # Target: P3 (25s NS / 35s EW)
+        # Target: P3 (25s NS / 35s EW) - Demand ratio ~1.3-1.45 favoring EW
         return {
-            "N": round(rng.uniform(12.0, 18.0), 1),
-            "S": round(rng.uniform(12.0, 18.0), 1),
-            "E": round(rng.uniform(22.0, 30.0), 1),
-            "W": round(rng.uniform(18.0, 26.0), 1),
+            "N": round(rng.uniform(13.0, 17.0), 1),
+            "S": round(rng.uniform(13.0, 17.0), 1),
+            "E": round(rng.uniform(19.0, 25.0), 1),
+            "W": round(rng.uniform(17.0, 23.0), 1),
         }
 
     elif archetype == "moderate_ns":
-        # Target: P6 (40s NS / 20s EW)
+        # Target: P6 (40s NS / 20s EW) - Demand ratio ~1.8-2.2
         return {
-            "N": round(rng.uniform(28.0, 36.0), 1),
-            "S": round(rng.uniform(20.0, 30.0), 1),
-            "E": round(rng.uniform(8.0, 15.0), 1),
-            "W": round(rng.uniform(8.0, 15.0), 1),
+            "N": round(rng.uniform(25.0, 32.0), 1),
+            "S": round(rng.uniform(19.0, 26.0), 1),
+            "E": round(rng.uniform(9.0, 14.0), 1),
+            "W": round(rng.uniform(9.0, 14.0), 1),
         }
 
     elif archetype == "moderate_ew":
-        # Target: P2 (20s NS / 40s EW)
+        # Target: P2 (20s NS / 40s EW) - Demand ratio ~1.8-2.2 favoring EW
         return {
-            "N": round(rng.uniform(8.0, 15.0), 1),
-            "S": round(rng.uniform(8.0, 15.0), 1),
-            "E": round(rng.uniform(28.0, 36.0), 1),
-            "W": round(rng.uniform(20.0, 30.0), 1),
+            "N": round(rng.uniform(9.0, 14.0), 1),
+            "S": round(rng.uniform(9.0, 14.0), 1),
+            "E": round(rng.uniform(25.0, 32.0), 1),
+            "W": round(rng.uniform(19.0, 26.0), 1),
         }
 
     elif archetype == "heavy_ns":
-        # Target: P7 (45s NS / 15s EW)
+        # Target: P7 (45s NS / 15s EW) - Demand ratio >= 2.8
         return {
-            "N": round(rng.uniform(36.0, 45.0), 1),
-            "S": round(rng.uniform(25.0, 35.0), 1),
-            "E": round(rng.uniform(5.0, 10.0), 1),
-            "W": round(rng.uniform(5.0, 10.0), 1),
+            "N": round(rng.uniform(34.0, 44.0), 1),
+            "S": round(rng.uniform(24.0, 34.0), 1),
+            "E": round(rng.uniform(5.0, 9.0), 1),
+            "W": round(rng.uniform(5.0, 9.0), 1),
         }
 
     elif archetype == "heavy_ew":
-        # Target: P1 (15s NS / 45s EW)
+        # Target: P1 (15s NS / 45s EW) - Demand ratio >= 2.8 favoring EW
         return {
-            "N": round(rng.uniform(5.0, 10.0), 1),
-            "S": round(rng.uniform(5.0, 10.0), 1),
-            "E": round(rng.uniform(36.0, 45.0), 1),
-            "W": round(rng.uniform(25.0, 35.0), 1),
+            "N": round(rng.uniform(5.0, 9.0), 1),
+            "S": round(rng.uniform(5.0, 9.0), 1),
+            "E": round(rng.uniform(34.0, 44.0), 1),
+            "W": round(rng.uniform(24.0, 34.0), 1),
         }
 
     else:  # random_mix
         return {
-            app: round(rng.uniform(8.0, 35.0), 1)
+            app: round(rng.uniform(7.0, 32.0), 1)
             for app in ("N", "S", "E", "W")
         }
 
@@ -118,9 +119,9 @@ def _process_single_scenario(args: Tuple[int, Dict[str, float], int, int]) -> Di
 
 
 def generate_dataset(
-    num_scenarios: int = 500,
+    num_scenarios: int = 800,
     warmup_steps: int = 70,
-    horizon_steps: int = 70,
+    horizon_steps: int = 140,
     seed: int = 42,
     output_dir: Path = DATA_DIR,
     max_workers: int = 8,
@@ -128,9 +129,9 @@ def generate_dataset(
     """Generate labeled dataset using parallel ground-truth forward simulation.
 
     Args:
-        num_scenarios: Total number of traffic scenarios to generate.
-        warmup_steps: Simulation warmup steps before feature capture.
-        horizon_steps: Forward evaluation window for candidate timing plans.
+        num_scenarios: Total number of traffic scenarios to generate (default 800).
+        warmup_steps: Simulation warmup steps before feature capture (70s = 1 cycle).
+        horizon_steps: Forward evaluation window for candidate plans (140s = 2 full cycles).
         seed: Master random seed.
         output_dir: Directory where train.csv, val.csv, and test.csv will be saved.
         max_workers: Number of parallel worker processes.
@@ -146,7 +147,7 @@ def generate_dataset(
         rates = sample_scenario_rates(rng)
         tasks.append((scenario_id, rates, warmup_steps, horizon_steps))
 
-    print(f"Generating {num_scenarios} scenarios with {max_workers} parallel workers...")
+    print(f"Generating {num_scenarios} scenarios with {max_workers} parallel workers (horizon={horizon_steps}s)...")
 
     results: List[Dict[str, Any]] = []
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
@@ -183,8 +184,10 @@ def generate_dataset(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate AdaptiveFlow training dataset.")
-    parser.add_argument("--num_scenarios", type=int, default=500, help="Number of scenarios.")
-    parser.add_argument("--workers", type=int, default=min(8, os.cpu_count() or 4), help="Parallel workers.")
+    parser.add_argument("--num_scenarios", type=int, default=800, help="Number of scenarios.")
+    parser.add_argument("--horizon", type=int, default=140, help="Forward horizon steps.")
+    parser.add_argument("--workers", type=int, default=min(4, os.cpu_count() or 2), help="Parallel workers.")
     args = parser.parse_args()
 
-    generate_dataset(num_scenarios=args.num_scenarios, max_workers=args.workers)
+    generate_dataset(num_scenarios=args.num_scenarios, horizon_steps=args.horizon, max_workers=args.workers)
+
