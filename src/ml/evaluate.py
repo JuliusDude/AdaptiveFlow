@@ -82,7 +82,8 @@ def evaluate_benchmark(
     """
     if test_csv_path.exists():
         test_df = pd.read_csv(test_csv_path)
-        eval_records = test_df.head(num_eval_scenarios).to_dict(orient="records")
+        unique_scenarios = test_df.drop_duplicates(subset=["scenario_id"])
+        eval_records = unique_scenarios.head(num_eval_scenarios).to_dict(orient="records")
     else:
         # Fallback to standard presets
         eval_records = [{"scenario_id": i, **preset} for i, preset in enumerate(SCENARIO_PRESETS.values())]

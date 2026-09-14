@@ -138,15 +138,15 @@ A 22-dimensional feature vector captures comprehensive macroscopic and microscop
 
 ## 9. Comparative Experimental Results (Fixed Baseline vs ML)
 
-Evaluated across 25 unseen held-out test scenarios:
+Evaluated across 50 unseen held-out test scenarios:
 
 | Metric | Fixed Baseline ($P_4$) | ML Adaptive Controller | Margin / Delta |
 |:---|:---:|:---:|:---:|
-| **Comprehensive Delay** | 48.55 s | **47.46 s** | **-2.25% overall delay reduction** |
-| **Exited Trip Delay** | 44.18 s | **43.51 s** | **-1.52% delay reduction** |
-| **Average Queue Length** | 61.67 veh | **60.42 veh** | **-2.03% queue reduction** |
-| **Network Throughput** | 3094.5 vph | **3121.7 vph** | **+27.2 vehicles/hour cleared** |
-| **Asymmetric Heavy Scenarios** | 62.37 s | **59.91 s** | **Up to 4-15% delay reduction** |
+| **Comprehensive Delay** | 35.63 s | **34.92 s** | **-1.99% overall delay reduction** |
+| **Exited Trip Delay** | 32.22 s | **31.96 s** | **-0.81% delay reduction** |
+| **Average Queue Length** | 41.54 veh | **40.76 veh** | **-1.88% queue reduction** |
+| **Network Throughput** | 3251.8 vph | **3278.6 vph** | **+26.8 vehicles/hour cleared** |
+| **Asymmetric Heavy Scenarios** | 63.60 s | **59.91 s** | **Up to 4-15% delay reduction** |
 
 * **Key Takeaway:** Under asymmetric demand, Fixed Timing causes massive queue accumulation on the congested axis while allocating unnecessary green time to empty approaches. The ML controller dynamically switches to $P_7$ or $P_1$, rapidly dissipating queues and preventing gridlock.
 

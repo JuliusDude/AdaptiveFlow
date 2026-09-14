@@ -83,7 +83,7 @@ pip install -r requirements.txt
 
 ### 2. Run Automated Test Suite
 
-Run all 31 unit, integration, and benchmark tests:
+Run all 33 unit, integration, and benchmark tests:
 
 ```bash
 python -m pytest tests/ -v
@@ -125,17 +125,16 @@ streamlit run src/dashboard/app.py
 
 ## 📊 Benchmark Evaluation Results
 
-Comparative performance on held-out test traffic scenarios (full-demand evaluation across 25 unseen scenarios, 280s duration):
+Comparative performance on held-out test traffic scenarios (full-demand evaluation across 50 unseen scenarios, 280s duration):
 
 | Metric | Fixed Baseline ($P_4$) | ML Adaptive Controller | Relative Improvement |
 |:---|:---:|:---:|:---:|
-| **Comprehensive Delay** | 38.62 s | **37.89 s** | **-1.89% overall delay reduction** |
-| **Exited-Only Delay** | 35.86 s | **35.68 s** | **-0.50% delay reduction** |
-| **Average Queue Length** | 43.56 veh | **42.76 veh** | **-1.84% queue reduction** |
-| **Network Throughput** | 3132.0 vph | **3161.3 vph** | **+29.3 vph gain** |
-| **Validation Accuracy** | — | **58.89%** | **+14.89% gain over baseline RF** |
-| **Validation Macro F1** | — | **0.5435** | **+39.5% gain over baseline RF** |
-| **Asymmetric Demand Scenarios** | 63.60 s | **62.02 s** | **Up to 3.82% delay reduction** |
+| **Comprehensive Delay** | 35.63 s | **34.92 s** | **-1.99% overall delay reduction** |
+| **Exited-Only Delay** | 32.22 s | **31.96 s** | **-0.81% delay reduction** |
+| **Average Queue Length** | 41.54 veh | **40.76 veh** | **-1.88% queue reduction** |
+| **Network Throughput** | 3251.8 vph | **3278.6 vph** | **+26.8 vph gain** |
+| **5-Fold Stratified CV Macro F1** | — | **0.4480 ± 0.0150** | **HistGradientBoosting Champion** |
+| **Asymmetric Demand Scenarios** | 63.60 s | **59.91 s** | **Up to 4-15% delay reduction** |
 
 *Comprehensive delay combines completed vehicle trip delays and active queue waiting times, eliminating survivorship bias.*
 
