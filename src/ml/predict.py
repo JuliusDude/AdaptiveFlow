@@ -122,14 +122,25 @@ class AdaptiveMLController:
                 # Fast single-pass inference (predict plan and probabilities in one call)
                 plan, probs = self.predictor.predict_with_proba(features)
 
-                # Confidence thresholding & stability guard:
-                # If top prediction has low confidence and directional demand is near-equal,
-                # maintain balanced baseline P4 to prevent spurious flapping
-                top_conf = probs.get(plan, 0.0)
                 ns_vol = features["N_count"] + features["S_count"]
                 ew_vol = features["E_count"] + features["W_count"]
-                if top_conf < self.confidence_threshold and abs(ns_vol - ew_vol) <= 2:
+                ns_q = features["N_queue"] + features["S_queue"]
+                ew_q = features["E_queue"] + features["W_queue"]
+                tot_vol = max(1.0, ns_vol + ew_vol)
+                demand_ratio = ns_vol / tot_vol
+                top_conf = probs.get(plan, 0.0)
+
+                # Stability Guard 1: In near-balanced demand, lock to P4 to avoid micro-flapping
+                if (0.45 <= demand_ratio <= 0.55 and abs(ns_q - ew_q) <= 2) or (top_conf < self.confidence_threshold and abs(ns_vol - ew_vol) <= 4):
                     plan = "P4"
+                elif sim.current_time > 0 and sim.signal.current_plan_name:
+                    # Stability Guard 2: Hysteresis slew-rate limiter (prevent extreme 1-step jumps)
+                    current_idx = int(sim.signal.current_plan_name[1:])
+                    pred_idx = int(plan[1:])
+                    delta = pred_idx - current_idx
+                    if abs(delta) > 2:
+                        step_dir = 2 if delta > 0 else -2
+                        plan = f"P{current_idx + step_dir}"
 
             # Apply plan immediately so current cycle actuates the selected timings (no 70s actuation lag)
             sim.signal.apply_plan_now(plan)
