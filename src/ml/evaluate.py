@@ -3,7 +3,7 @@
 import argparse
 import json
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
 import pandas as pd
 from src.simulator.intersection import IntersectionSimulation
 from src.simulator.signal import TrafficSignal
@@ -18,6 +18,7 @@ def run_scenario_trial(
     rates: Dict[str, float],
     seed: int,
     duration_seconds: int = 280,  # ~4 full cycles
+    controller: Optional[AdaptiveMLController] = None,
 ) -> Dict[str, Dict[str, Any]]:
     """Run an identical traffic scenario under both Fixed Baseline and ML Adaptive controllers.
 
@@ -25,6 +26,7 @@ def run_scenario_trial(
         rates: Dict of approach arrival rates (N, S, E, W).
         seed: Random seed ensuring identical vehicle arrivals.
         duration_seconds: Total simulation duration in seconds.
+        controller: Optional pre-loaded AdaptiveMLController instance for high throughput.
 
     Returns:
         Dictionary with keys 'fixed' and 'ml', each containing simulation summary metrics.
@@ -42,17 +44,21 @@ def run_scenario_trial(
     ml_gen = TrafficGenerator(rates=rates, seed=seed)
     ml_signal = TrafficSignal(initial_plan="P4")
     ml_sim = IntersectionSimulation(signal=ml_signal, generator=ml_gen, seed=seed)
-    controller = AdaptiveMLController()
+    if controller is None:
+        ctrl = AdaptiveMLController()
+    else:
+        ctrl = controller
+        ctrl.decision_history = []
 
     # Initial decision at t=0
-    controller.update(ml_sim, force_update=True)
+    ctrl.update(ml_sim, force_update=True)
 
     for _ in range(duration_seconds):
         ml_sim.step(dt=1.0)
-        controller.update(ml_sim)
+        ctrl.update(ml_sim)
 
     ml_summary = ml_sim.get_summary()
-    ml_summary["plans_selected"] = [d["selected_plan"] for d in controller.decision_history]
+    ml_summary["plans_selected"] = [d["selected_plan"] for d in ctrl.decision_history]
 
     return {"fixed": fixed_summary, "ml": ml_summary}
 
@@ -83,6 +89,9 @@ def evaluate_benchmark(
 
     print(f"Running comparative benchmark across {len(eval_records)} unseen test scenarios...")
 
+    # Reuse single shared controller instance across all scenarios (avoids reloading model from disk)
+    shared_controller = AdaptiveMLController()
+
     fixed_delays: List[float] = []
     ml_delays: List[float] = []
     fixed_exited_delays: List[float] = []
@@ -104,7 +113,12 @@ def evaluate_benchmark(
             "W": float(rec.get("true_W_rate", rec.get("W_arrival", rec.get("W", 15.0)))),
         }
 
-        trial = run_scenario_trial(rates=rates, seed=seed, duration_seconds=duration_seconds)
+        trial = run_scenario_trial(
+            rates=rates,
+            seed=seed,
+            duration_seconds=duration_seconds,
+            controller=shared_controller,
+        )
         f_res = trial["fixed"]
         m_res = trial["ml"]
 

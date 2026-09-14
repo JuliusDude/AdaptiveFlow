@@ -164,7 +164,7 @@
   - Prevent extreme overfitting (closing 55% train-val gap) and eliminate zero-F1 class collapse
   - Train model, evaluate metrics, and serialize artifact to `models/random_forest.pkl`
 
-- [ ] **Task I4: Controller Performance Optimization & Confidence Thresholding**
+- [x] **Task I4: Controller Performance Optimization & Confidence Thresholding**
   - Eliminate duplicate inference calls and optimize NumPy inference speed in `src/ml/predict.py`
   - Implement confidence thresholding to prevent spurious switching under balanced demand
   - Optimize `src/ml/evaluate.py` to reuse predictor instance and avoid disk reload in loop
